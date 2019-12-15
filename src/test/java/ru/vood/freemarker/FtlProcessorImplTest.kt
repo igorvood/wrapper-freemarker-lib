@@ -3,6 +3,7 @@ package ru.vood.freemarker
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class FtlProcessorImplTest {
 
@@ -30,6 +31,21 @@ internal class FtlProcessorImplTest {
         val stringParam = "zxc"
         val processFile = ftlProcessor.processFile(FtlProcessorImplTest::class.java, "FtlProcessorImplTestWithParam.ftl", arrayOf(stringParam))
         Assertions.assertEquals("PARAM->$stringParam", processFile)
+    }
+
+    @Test
+    fun processFileByClassWithParamObject_1() {
+        val stringParam = Car("BMW", 1234, Date(2000, 3, 13))
+        val processFile = ftlProcessor.processFile(FtlProcessorImplTest::class.java, "FtlProcessorImplTestWithParam.ftl", arrayOf(stringParam))
+        Assertions.assertEquals("PARAM->$stringParam", processFile)
+    }
+
+    @Test
+    fun processFileByClassWithParamObject_2() {
+        val stringParam = Car("BMW", 123456789, Date())
+        val processFile = ftlProcessor.processFile(FtlProcessorImplTest::class.java, "FtlProcessorImplTestWithParamObject.ftl", arrayOf(stringParam))
+        Assertions.assertTrue(processFile.contains("model->BMW,price->123 456 789,date->"))
+        Assertions.assertTrue(processFile.contains(",dateTime->"))
     }
 
     @Test
