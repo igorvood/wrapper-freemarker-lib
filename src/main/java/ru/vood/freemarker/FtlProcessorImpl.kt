@@ -6,14 +6,13 @@ import java.io.File
 import java.io.StringWriter
 import java.util.*
 
-class FtlProcessorImpl : FtlProcessor {
+class FtlProcessorImpl(val cfg: Configuration) : FtlProcessor {
 
-    private val cfg = Configuration(Configuration.VERSION_2_3_29)
+    constructor() : this(Configuration(Configuration.VERSION_2_3_29))
 
-    override fun processFile(fileName: String, args: Array<Any?>?): String {
-        val file = resolveFile(fileName)
+    override fun processFile(file: File, args: Array<Any?>?): String {
         if (!file.exists())
-            throw IllegalStateException("File $fileName doesn't exists")
+            throw IllegalStateException("File ${file.absolutePath} doesn't exists")
         val ftl = FileTemplateLoader(File(file.parent))
         cfg.templateLoader = ftl
 
@@ -25,6 +24,8 @@ class FtlProcessorImpl : FtlProcessor {
         template.process(data, stringWriter)
         return stringWriter.buffer.toString()
     }
+
+    override fun processFile(fileName: String, args: Array<Any?>?) = processFile(resolveFile(fileName), args)
 
     override fun processFile(clazz: Class<*>, fileName: String, args: Array<Any?>?) = processFile("""${clazz.name.replace(".", "/")}/$fileName""", args)
 
