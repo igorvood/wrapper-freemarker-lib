@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ru.vood.freemarker.ext.sql;
+package ru.vood.freemarker.ext.sql.model;
 
 
 import freemarker.core.CollectionAndSequence;
 import freemarker.ext.beans.BeanModel;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.*;
+import ru.vood.freemarker.ext.sql.FetchedResultSet;
+import ru.vood.freemarker.ext.sql.FetchedResultSetTransposed;
 
 import java.util.ArrayList;
 import java.util.List;

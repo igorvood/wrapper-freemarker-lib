@@ -25,13 +25,4 @@ class FtlProcessorImpl(val cfg: Configuration) : FtlProcessor {
         return stringWriter.buffer.toString()
     }
 
-    override fun processFile(fileName: String, args: Array<Any?>?) = processFile(resolveFile(fileName), args)
-
-    override fun processFile(clazz: Class<*>, fileName: String, args: Array<Any?>?) = processFile("""${clazz.name.replace(".", "/")}/$fileName""", args)
-
-    private fun resolveFile(fileName: String): File {
-        val resource = javaClass.classLoader.getResource(fileName)
-        Optional.ofNullable(resource).orElseThrow { throw java.lang.IllegalStateException("File $fileName not found") }
-        return File(resource.path)
-    }
 }

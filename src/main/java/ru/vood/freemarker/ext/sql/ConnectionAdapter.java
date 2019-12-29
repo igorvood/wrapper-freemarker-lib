@@ -16,6 +16,8 @@
 package ru.vood.freemarker.ext.sql;
 
 
+import ru.vood.freemarker.ext.sql.model.FetchedResultSetTransposedModel;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;

@@ -13,31 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ru.vood.freemarker.ext.sql;
+package ru.vood.freemarker.ext.sql.model;
 
 
 import freemarker.ext.beans.BeanModel;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.*;
 
+import java.sql.Array;
 import java.sql.SQLException;
-import java.sql.Struct;
 import java.util.ArrayList;
 
 
 /**
- * This class wraps {@link Struct} and adapts it for using in FTL both as a sequence and as a bean.
+ * This class wraps {@link Array} and adapts it for using in FTL both as a sequence and as a bean.
  */
-public class StructModel extends BeanModel implements TemplateSequenceModel {
+public class ArrayModel extends BeanModel implements TemplateSequenceModel {
 
 
-    private final Object[] struct;
+    private final Object[] array;
 
 
-    public StructModel(Struct sqlStruct, BeansWrapper wrapper) throws TemplateModelException {
-        super(sqlStruct, wrapper);
+    public ArrayModel(Array sqlArray, BeansWrapper wrapper) throws TemplateModelException {
+        super(sqlArray, wrapper);
         try {
-            this.struct = sqlStruct.getAttributes();
+            this.array = (Object[]) sqlArray.getArray();
         } catch (SQLException e) {
             throw new TemplateModelException(e);
         }
@@ -45,22 +45,22 @@ public class StructModel extends BeanModel implements TemplateSequenceModel {
 
 
     /**
-     * Retrieves the i-th element in this structure.
+     * Retrieves the i-th element in this sequence.
      *
      * @return the item at the specified index
      */
     public TemplateModel get(int index) throws TemplateModelException {
-        return wrap(struct[index]);
+        return wrap(array[index]);
     }
 
 
     /**
-     * Returns the structure size.
+     * Returns the array size.
      *
-     * @return the number of items in the structure
+     * @return the number of items in the list
      */
     public int size() {
-        return struct.length;
+        return array.length;
     }
 
 
