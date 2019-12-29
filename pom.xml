@@ -41,6 +41,13 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>oracle</groupId>
+            <artifactId>ojdbc6</artifactId>
+            <version>11.2.0.2</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
