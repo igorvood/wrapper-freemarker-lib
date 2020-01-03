@@ -1,5 +1,4 @@
-﻿++++++++++++++++++++++++--------ArrayModel не измененно--------------------------
-import org.springframework.jdbc.core.CallableStatementCallback;
+﻿import org.springframework.jdbc.core.CallableStatementCallback;
 import sfqtl.Sfqt2lException;
 public class CallExecutor {
     private final ConnecArrayModeltionAdapter connectionAdapter;
@@ -63,31 +62,6 @@ public class CallExecutor {
                         }
                         ret.put(String.valueOf(index), retBind); }
                     return ret; } );   }}
-++++++++++++++++++++++++++----------ClobModel не изменено-------------------------------------------------------------------------------------------
-+++++++++++++++++++++++++++++++++++++++++++++++public class ColumnMeta {
-    private final boolean autoIncrement;
-    private final int nullable;
-    private final boolean signed;
-    private final String columnLabel;
-    private final String columnName;
-    private final int precision;
-    private final int scale;
-    private final int columnType;
-    private final String columnTypeName;
-    private final boolean readOnly;
-    private final boolean writable;
-    private final boolean definitelyWritable;
-    private final String columnClassName;
-    static List<ColumnMeta> of(ResultSetMetaData m) throws SQLException {
-        int colsCount = m.getColumnCount();
-        List<ColumnMeta> res = new ArrayList<>(colsCount);
-        for (int i = 1; i <= colsCount; i++) {
-            res.add( new ColumnMeta(
-                    m.isAutoIncrement(i), m.isNullable(i), m.isSigned(i), m.getColumnLabel(i), m.getColumnName(i),
-                    m.getPrecision(i), m.getScale(i), m.getColumnType(i), m.getColumnTypeName(i),
-                    m.isReadOnly(i), m.isWritable(i), m.isDefinitelyWritable(i), m.getColumnClassName(i)));}
-        return res;}
-    private ColumnMeta(
 ---------
 public class ConnectionAdapter {
     private final Sfqt2lProcessor config;
