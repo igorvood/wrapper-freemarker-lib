@@ -15,14 +15,10 @@
  */
 package ru.vood.freemarker.ext.sql;
 
-
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -32,87 +28,64 @@ import java.util.Map;
  */
 public class FetchedResultSet {
 
+    private final List<ColumnMeta> meta;
+    private final Map<String, Integer> columnIndices;
+    private final List<List<Object>> rows;
 
-    public final ResultSetMetaData metaData;
-    public final String[] columnLabels;
-    public final Map columnIndices;
-    public final Object[][] data;
-
-
-    /**
-     * Fetches the specified result set and saves it as an {@link Object}[][]. Also saves its metadata.
-     *
-     * @param rs the original result set
-     * @throws SQLException if a database access error occurs
-     */
-    public FetchedResultSet(ResultSet rs) throws SQLException {
-        metaData = rs.getMetaData();
-        int columnCount = metaData.getColumnCount();
-
-        columnLabels = new String[columnCount];
-        columnIndices = new HashMap(columnLabels.length, 1);
-
-        for (int i = 0; i < columnCount; i++) {
-            columnLabels[i] = metaData.getColumnLabel(i + 1);
-            // if two columns have same labels, save only the 1st one
-            if (columnIndices.get(columnLabels[i]) == null) {
-                columnIndices.put(columnLabels[i], new Integer(i));
-            }
-        }
-
-        List rows = new ArrayList(64);
-
-        while (rs.next()) {
-            Object[] row = new Object[columnCount];
+    FetchedResultSet(ResultSet rs, FtlDefaultObjectWrapper ftlDefaultObjectWrapper) throws SQLException {
+        try {
+            this.meta = Collections.unmodifiableList(ColumnMeta.of(rs.getMetaData()));
+            final int columnCount = meta.size();
+            Map<String, Integer> tempColumnIndices = new HashMap<>(columnCount, 1);
             for (int i = 0; i < columnCount; i++) {
-                Object o = rs.getObject(i + 1);
-                if (o instanceof ResultSet) {
-                    o = new FetchedResultSet((ResultSet) o);
-                }
-                row[i] = o;
+                String columnLabel = meta.get(i).getColumnLabel();
+                // if two columns have same labels, save only the 1st one
+                tempColumnIndices.putIfAbsent(columnLabel, i);
             }
-            rows.add(row);
+            List<List<Object>> tempRows = new ArrayList<>(64);
+            while (rs.next()) {
+                List<Object> row = new ArrayList<>(columnCount);
+                for (int i = 0; i < columnCount; i++) {
+                    Object o = rs.getObject(i + 1);
+                    if (o instanceof ResultSet) {
+                        o = new FetchedResultSet((ResultSet) o, ftlDefaultObjectWrapper);
+                    }
+                    row.add(o);
+                }
+                tempRows.add(Collections.unmodifiableList(row));
+            }
+            this.rows = Collections.unmodifiableList(tempRows);
+            this.columnIndices = Collections.unmodifiableMap(tempColumnIndices);
+        } finally {
+            if (!rs.isClosed()) {
+                rs.close();
+            }
         }
-
-        data = (Object[][]) rows.toArray(new Object[rows.size()][columnCount]);
-
-        rs.close();
     }
 
-
-    /**
-     * Returns the original {@link ResultSet}'s metadata.
-     *
-     * @return the metadata
-     */
-    public ResultSetMetaData getMetaData() {
-        return metaData;
+    public List<String> getColumnLabels() {
+        return meta.stream().map(ColumnMeta::getColumnLabel).collect(Collectors.toList());
     }
 
-
-    /**
-     * Returns the specified column's index starting from 0. This index is used to access FTL sequences.
-     *
-     * @param label the column's label
-     * @return the column's index or {@code null} if no column with such label exists
-     */
     public Integer getColumnIndex(String label) {
-        return (Integer) columnIndices.get(label);
+        return columnIndices.get(label);
     }
 
-
-    /**
-     * Returns the specified column's position starting from 1 as {@link ResultSet#findColumn(String)} does. This
-     * index is used in {@link ResultSetMetaData} methods.
-     *
-     * @param label the column's label
-     * @return the column's position or {@code null} if no column with such label exists
-     */
     public Integer findColumn(String label) {
         Integer index = getColumnIndex(label);
         if (index == null) return null;
-        return new Integer(index.intValue() + 1);
+        return index + 1;
     }
 
+    public List<ColumnMeta> getMetaData() {
+        return meta;
+    }
 
+    public Map<String, Integer> getColumnIndices() {
+        return columnIndices;
+    }
+
+    public List<List<Object>> getRows() {
+        return rows;
+    }
 }

@@ -24,76 +24,37 @@ import ru.vood.freemarker.ext.sql.FetchedResultSetTransposed;
  * This class wraps {@link FetchedResultSetTransposed} and adapts it for using in FTL both as a sequence and a hash of
  * columns.
  */
-public class FetchedResultSetTransposedModel extends WrappingTemplateModel implements TemplateSequenceModel,
-        TemplateHashModelEx {
-
-
-    public final FetchedResultSetTransposed frst;
-
+public class FetchedResultSetTransposedModel extends WrappingTemplateModel
+        implements TemplateSequenceModel, TemplateHashModelEx {
+    private final FetchedResultSetTransposed frst;
 
     public FetchedResultSetTransposedModel(FetchedResultSetTransposed frst, ObjectWrapper wrapper) {
         super(wrapper);
         this.frst = frst;
     }
 
-
-    /**
-     * Retrieves the i-th column of this result set.
-     *
-     * @return the column at the specified index
-     */
-    public TemplateModel get(int index) throws TemplateModelException {
-        return wrap(frst.transposedData[index]);
+    public TemplateModel get(int columnIndex) throws TemplateModelException {
+        return wrap(frst.getTransposedData().get(columnIndex));
     }
 
-
-    /**
-     * Retrieves the specified column in this result set.
-     *
-     * @return the specified column as an array
-     */
     public TemplateModel get(String key) throws TemplateModelException {
-        return wrap(frst.transposedData[((Integer) frst.resultSet.columnIndices.get(key)).intValue()]);
+        return wrap(frst.getTransposedData().get(frst.getResultSet().getColumnIndex(key)));
     }
 
-
-    /**
-     * Returns the row length.
-     *
-     * @return the number of columns in this result set
-     */
     public int size() {
-        return frst.transposedData.length;
+        return frst.getTransposedData().size();
     }
 
-
-    /**
-     * Returns a list of column names in this result set.
-     *
-     * @return a list of column names ordered by position
-     */
-    public TemplateCollectionModel keys() throws TemplateModelException {
-        return new SimpleCollection(java.util.Arrays.asList(frst.resultSet.columnLabels), getObjectWrapper());
+    public TemplateCollectionModel keys() {
+        return new SimpleCollection(frst.getResultSet().getColumnLabels(), getObjectWrapper());
     }
 
-
-    /**
-     * Returns a list of columns in this result set.
-     *
-     * @return the list of column arrays ordered by position
-     */
-    public TemplateCollectionModel values() throws TemplateModelException {
-        return new SimpleCollection(java.util.Arrays.asList(frst.transposedData), getObjectWrapper());
+    public TemplateCollectionModel values() {
+        return new SimpleCollection(frst.getTransposedData(), getObjectWrapper());
     }
 
-
-    /**
-     * Determines whether the result set contains no columns.
-     *
-     * @return always {@code false}
-     */
-    public boolean isEmpty() throws TemplateModelException {
-        return frst.transposedData.length == 0;
+    public boolean isEmpty() {
+        return frst.getTransposedData().isEmpty();
     }
 
 

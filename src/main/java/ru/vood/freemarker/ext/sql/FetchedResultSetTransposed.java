@@ -16,27 +16,39 @@
 package ru.vood.freemarker.ext.sql;
 
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.IntStream;
+
 /**
  * This class is a transposed {@link FetchedResultSet}.
  */
 public class FetchedResultSetTransposed {
 
-
-    public final FetchedResultSet resultSet;
-    public final Object[][] transposedData;
-
+    private final FetchedResultSet resultSet;
+    private final List<List<Object>> transposedData;
 
     public FetchedResultSetTransposed(FetchedResultSet frs) {
-
         this.resultSet = frs;
+        int columnsCount = frs.getMetaData().size();
+        List<List<Object>> tempTransposedData = new ArrayList<>();
+        this.transposedData = Collections.unmodifiableList(tempTransposedData);
+        List<List<Object>> origRows = frs.getRows();
+        IntStream.range(0, columnsCount).forEach(
+                columnIndex -> {
+                    List<Object> columnData = new ArrayList<>(origRows.size());
+                    origRows.forEach(row -> columnData.add(row.get(columnIndex)));
+                    tempTransposedData.add(Collections.unmodifiableList(columnData));
+                });
+    }
 
-        transposedData = new Object[resultSet.columnLabels.length][];
-        for (int ri = 0; ri < resultSet.data.length; ri++) {
-            for (int ci = 0; ci < resultSet.columnLabels.length; ci++) {
-                if (transposedData[ci] == null) transposedData[ci] = new Object[resultSet.data.length];
-                transposedData[ci][ri] = resultSet.data[ri][ci];
-            }
-        }
+    public List<List<Object>> getTransposedData() {
+        return transposedData;
+    }
+
+    public FetchedResultSet getResultSet() {
+        return resultSet;
     }
 
 

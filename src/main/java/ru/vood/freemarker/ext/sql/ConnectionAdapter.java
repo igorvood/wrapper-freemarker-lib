@@ -1,25 +1,7 @@
-/*
- * Copyright 2014-2016 Victor Osolovskiy, Sergey Navrotskiy
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package ru.vood.freemarker.ext.sql;
 
+import org.springframework.jdbc.core.JdbcOperations;
 
-import ru.vood.freemarker.ext.sql.model.FetchedResultSetTransposedModel;
-
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -31,114 +13,35 @@ import java.util.Map;
 public class ConnectionAdapter {
 
 
-    private final Connection connection;
-    private QueryExecutor qe;
-    private CallExecutor ce;
+    private final Sfqt2lProcessor config;
+    private final JdbcOperations jdbcOperations;
+    private final QueryExecutor qe;
+    private final CallExecutor ce;
 
-
-    /**
-     * Creates an instance, wrapping the specified JDBC connection.
-     *
-     * @param connection the connection to be wrapped
-     */
-    public ConnectionAdapter(Connection connection) {
-        this.connection = connection;
+    public ConnectionAdapter(Sfqt2lProcessor config, JdbcOperations jdbcOperations) {
+        this.config = config;
+        this.jdbcOperations = jdbcOperations;
+        qe = new QueryExecutor(this);
+        ce = new CallExecutor(this);
     }
 
-
-    /**
-     * Returns the inner JDBC connection.
-     *
-     * @return the inner connection
-     */
-    public Connection getConnection() {
-        return connection;
+    JdbcOperations getJdbcOperations() {
+        return jdbcOperations;
     }
 
-
-    private synchronized QueryExecutor getQueryExecutor() {
-        if (qe == null) {
-            qe = new QueryExecutor(connection);
-        }
-        return qe;
+    Sfqt2lProcessor getConfig() {
+        return config;
     }
 
-
-    private synchronized CallExecutor getCallExecutor() {
-        if (ce == null) {
-            ce = new CallExecutor(connection);
-        }
-        return ce;
+    public FetchedResultSet query(String sql) {
+        return qe.executeQuery(sql);
     }
 
-
-    /**
-     * Executes an SQL query with the aid of the inner {@link QueryExecutor}.
-     *
-     * @param sql the SQL-query to be executed
-     * @return the query result wrapped into {@link FetchedResultSetTransposedModel}
-     * @throws SQLException if a database access error occurs
-     */
-    public FetchedResultSet query(String sql) throws SQLException {
-        return getQueryExecutor().executeQuery(sql);
+    public FetchedResultSet query(String sql, List binds) {
+        return qe.executeQuery(sql, binds);
     }
 
-
-    /**
-     * Executes an SQL query with bind variables with the aid of the inner {@link QueryExecutor}.
-     *
-     * @param sql   the SQL-query to be executed
-     * @param binds the list of bind variable values
-     * @return the query result wrapped into {@link FetchedResultSetTransposedModel}
-     * @throws SQLException if a database access error occurs
-     */
-    public FetchedResultSet query(String sql, List binds) throws SQLException {
-        return getQueryExecutor().executeQuery(sql, binds);
+    public Map call(String statement, Map inBinds, Map outBinds) {
+        return ce.executeCall(statement, inBinds, outBinds);
     }
-
-
-    /**
-     * Executes a callable statement with the aid of the inner {@link CallExecutor}.
-     *
-     * @param statement the callable statement to be executed
-     * @param inBinds   the map of in bind variable indices to their values
-     * @param outBinds  the map of out bind variable indices to their types
-     * @return the map of out bind variable indices to their values
-     * @throws SQLException if a database access error occurs
-     */
-    public Map call(String statement, Map inBinds, Map outBinds) throws SQLException {
-        return getCallExecutor().executeCall(statement, inBinds, outBinds);
-    }
-
-
-    /**
-     * Commits transaction in the inner JDBC connection.
-     *
-     * @throws SQLException if a database access error occurs
-     */
-    public void commit() throws SQLException {
-        connection.commit();
-    }
-
-
-    /**
-     * Rollbacks transaction in the inner JDBC connection.
-     *
-     * @throws SQLException if a database access error occurs
-     */
-    public void rollback() throws SQLException {
-        connection.rollback();
-    }
-
-
-    /**
-     * Closes the inner JDBC connection.
-     *
-     * @throws SQLException if a database access error occurs
-     */
-    public void close() throws SQLException {
-        connection.close();
-    }
-
-
 }

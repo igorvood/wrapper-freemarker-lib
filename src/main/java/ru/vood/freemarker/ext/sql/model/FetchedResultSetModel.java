@@ -20,11 +20,11 @@ import freemarker.core.CollectionAndSequence;
 import freemarker.ext.beans.BeanModel;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.*;
+import org.springframework.util.Assert;
 import ru.vood.freemarker.ext.sql.FetchedResultSet;
 import ru.vood.freemarker.ext.sql.FetchedResultSetTransposed;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 
@@ -33,41 +33,24 @@ import java.util.Set;
  */
 public class FetchedResultSetModel extends BeanModel implements TemplateSequenceModel, TemplateScalarModel {
 
-
-    private final static String TRANSPOSE_METHOD_NAME = "transpose";
-    private final ObjectWrapper wrapper;
+    private static final String TRANSPOSE_METHOD_NAME = "transpose";
+    private final ObjectWrapper objectWrapper;
     private final FetchedResultSet frs;
 
-
-    public FetchedResultSetModel(FetchedResultSet frs, BeansWrapper wrapper) {
-        super(frs, wrapper);
-        this.wrapper = wrapper;
+    public FetchedResultSetModel(FetchedResultSet frs, BeansWrapper objectWrapper) {
+        super(frs, objectWrapper);
+        this.objectWrapper = objectWrapper;
         this.frs = frs;
     }
 
-    /**
-     * Retrieves the i-th row in this result set.
-     *
-     * @return the row at the specified index (rownum - 1)
-     */
-    public TemplateModel get(int index) throws TemplateModelException {
-        return new FetchedResultSetRowModel(frs, index, wrapper);
+    public TemplateModel get(int index) {
+        return new FetchedResultSetRowModel(frs, index, objectWrapper);
     }
 
-    /**
-     * Returns the row count.
-     *
-     * @return the number of rows in this result set
-     */
     public int size() {
-        return frs.data.length;
+        return frs.getRows().size();
     }
 
-    /**
-     * Get the specified property or method's result.
-     *
-     * @return the result of evaluation
-     */
     public TemplateModel get(String key) throws TemplateModelException {
         if (key.equals(TRANSPOSE_METHOD_NAME)) {
             return transpose();
@@ -75,66 +58,31 @@ public class FetchedResultSetModel extends BeanModel implements TemplateSequence
         return super.get(key);
     }
 
-
-    /**
-     * Returns the transposed result set as a {@link FetchedResultSetTransposedModel}.
-     *
-     * @return the transposed result set
-     */
-    public TemplateModel transpose() {
-        return new TemplateMethodModelEx() {
-            public Object exec(List args) throws TemplateModelException {
-                if (args.size() != 0) {
-                    throw new TemplateModelException("No arguments needed");
-                }
-                return wrap(new FetchedResultSetTransposed(frs));
-            }
+    private TemplateMethodModelEx transpose() {
+        return args -> {
+            Assert.isTrue(args.isEmpty(), () -> "No arguments needed, but args=" + args);
+            return wrap(new FetchedResultSetTransposed(frs));
         };
     }
 
-
-    /**
-     * Returns the list of available methods and properties, extended by own methods.
-     *
-     * @return the collection of methods and properties
-     */
     public TemplateCollectionModel keys() {
-        Set keySetEx = super.keySet();
+        Set<String> keySetEx = super.keySet();
         keySetEx.add(TRANSPOSE_METHOD_NAME);
-        return new CollectionAndSequence(new SimpleSequence(keySetEx, wrapper));
+        return new CollectionAndSequence(new SimpleSequence(keySetEx, objectWrapper));
     }
 
-
-    /**
-     * Returns the empty list. Iteration through the {@code super.values()} list causes an exception.
-     *
-     * @return the empty list
-     */
     public TemplateCollectionModel values() {
-        return new SimpleCollection(new ArrayList(0), wrapper);
+        return new SimpleCollection(new ArrayList(0), objectWrapper);
     }
 
-
-    /**
-     * Returns the result set as a text table with column headers. This method should be used for debugging only.
-     * Usage example: {@code ${my_result}}.
-     *
-     * @return the result set as text
-     */
     public String getAsString() {
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < frs.columnLabels.length; i++) {
-            sb.append(frs.columnLabels[i]).append('\t');
-        }
+        StringBuilder sb = new StringBuilder();
+        frs.getColumnLabels().forEach(cl -> sb.append(cl).append('\t'));
         sb.append('\n');
-        for (int ri = 0; ri < frs.data.length; ri++) {
-            for (int ci = 0; ci < frs.columnLabels.length; ci++) {
-                sb.append(frs.data[ri][ci]).append('\t');
-            }
+        frs.getRows().forEach(row -> {
+            row.forEach(columnVal -> sb.append(columnVal).append('\t'));
             sb.append('\n');
-        }
+        });
         return sb.toString();
     }
-
-
 }

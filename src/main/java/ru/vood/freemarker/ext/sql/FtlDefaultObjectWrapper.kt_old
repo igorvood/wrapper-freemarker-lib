@@ -21,7 +21,7 @@ import java.sql.Struct
  *  * [FetchedResultSetTransposedModel] - wraps transposed result sets
  *
  */
-class FtlDefaultObjectWrapper(incompatibleImprovements: Version?) : DefaultObjectWrapper(incompatibleImprovements) {
+class FtlDefaultObjectWrapper 1111(incompatibleImprovements: Version) : DefaultObjectWrapper(incompatibleImprovements) {
 
     override fun handleUnknownType(obj: Any): TemplateModel {
         return when (obj) {
