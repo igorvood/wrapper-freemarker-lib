@@ -1,0 +1,829 @@
+﻿--------ArrayModel не измененно--------------------------
+import org.springframework.jdbc.core.CallableStatementCallback;
+import sfqtl.Sfqt2lException;
+public class CallExecutor {
+    private final ConnecArrayModeltionAdapter connectionAdapter;
+    CallExecutor(ConnectionAdapter connectionAdapter) {        this.connectionAdapter = connectionAdapter;    }
+    public Map executeCall(String call, Map inBinds, Map outBinds)  {
+        if (call == null || "".equals(call.trim())) {            throw new Sfqt2lException("Unable to execute empty call");        }
+        if (inBinds == null) inBinds = Collections.emptyMap();
+        if (outBinds == null) outBinds = Collections.emptyMap();
+        return executeCallInternal(call, inBinds, outBinds); }
+    private static void setInBinds(CallableStatement cs, Map inBinds) throws SQLException {
+        for (Object o1 : inBinds.entrySet()) {
+            Map.Entry e = (Map.Entry) o1;
+            int index;
+            try { index = Integer.parseInt(e.getKey().toString()); } catch (NumberFormatException ex) {
+                throw new Sfqt2lException("Wrong in bind variable index: expected int, got String", ex); }
+            Object o = e.getValue();
+            // JDBC can't work with java.util.Date directly
+            if (o instanceof Date) o = TypeHelper.toSQLDate((Date) o);
+            cs.setObject(index, o);        }    }
+    private static void setOutBinds(CallableStatement cs, Map outBinds) throws SQLException {
+        for (Object o1 : outBinds.entrySet()) {
+            Map.Entry e = (Map.Entry) o1;
+            int index;
+            try { index = Integer.parseInt(e.getKey().toString());} catch (NumberFormatException ex) {
+                throw new SQLException("Wrong out bind variable index: expected int, got String", ex); }
+            Object o = e.getValue();
+            String typeName;
+            if (o instanceof String) { typeName = (String) o; } else {
+                throw new SQLException("Unable to register type of out bind variable #" + index + ": " + o); }
+            String sqlTypeName;
+            String usrTypeName;
+            int delimIndex = typeName.indexOf(':');
+            if (delimIndex == -1) {
+                sqlTypeName = typeName;
+                usrTypeName = null;
+            } else {
+                sqlTypeName = typeName.substring(0, delimIndex);
+                usrTypeName = typeName.substring(delimIndex + 1);
+            }
+            Integer sqlType;
+            try {sqlType = TypeHelper.getIntValue(sqlTypeName);} catch (Exception ex) {
+                throw new SQLException("Unknown SQL type of out bind variable #" + index + ": " + sqlTypeName, ex); }
+            if (usrTypeName == null || "".equals(usrTypeName.trim())) { cs.registerOutParameter(index, sqlType); } else {
+                cs.registerOutParameter(index, sqlType, usrTypeName); } }}
+    private Map<String, Object> executeCallInternal(String call, Map inBinds, Map outBinds) {
+        return connectionAdapter.getJdbcOperations().execute(
+                connection -> {
+                    CallableStatement cs = connection.prepareCall(call);
+                    setInBinds(cs, inBinds);
+                    setOutBinds(cs, outBinds);
+                    return cs; },
+                (CallableStatementCallback<Map<String, Object>>) cs -> {
+                    cs.execute();
+                    Map<String, Object> ret = new HashMap<>(outBinds.size(), 1);
+                    for (Object o : outBinds.entrySet()) {
+                        Map.Entry e = (Map.Entry) o;
+                        int index = Integer.parseInt(e.getKey().toString());
+                        Object retBind = cs.getObject(index);
+                        if (retBind instanceof ResultSet) {
+                            retBind = new FetchedResultSet((ResultSet) retBind, this.connectionAdapter.getConfig().getFtlDefaultObjectWrapper());
+                        }
+                        ret.put(String.valueOf(index), retBind); }
+                    return ret; } );   }}
+----------ClobModel не изменено-------------------------------------------------------------------------------------------
+public class ColumnMeta {
+    private final boolean autoIncrement;
+    private final int nullable;
+    private final boolean signed;
+    private final String columnLabel;
+    private final String columnName;
+    private final int precision;
+    private final int scale;
+    private final int columnType;
+    private final String columnTypeName;
+    private final boolean readOnly;
+    private final boolean writable;
+    private final boolean definitelyWritable;
+    private final String columnClassName;
+    static List<ColumnMeta> of(ResultSetMetaData m) throws SQLException {
+        int colsCount = m.getColumnCount();
+        List<ColumnMeta> res = new ArrayList<>(colsCount);
+        for (int i = 1; i <= colsCount; i++) {
+            res.add( new ColumnMeta(
+                    m.isAutoIncrement(i), m.isNullable(i), m.isSigned(i), m.getColumnLabel(i), m.getColumnName(i),
+                    m.getPrecision(i), m.getScale(i), m.getColumnType(i), m.getColumnTypeName(i),
+                    m.isReadOnly(i), m.isWritable(i), m.isDefinitelyWritable(i), m.getColumnClassName(i)));}
+        return res;}
+    private ColumnMeta(
+---------
+public class ConnectionAdapter {
+    private final Sfqt2lProcessor config;
+    private final JdbcOperations jdbcOperations;
+    private final QueryExecutor qe;
+    private final CallExecutor ce;
+    public ConnectionAdapter(Sfqt2lProcessor config, JdbcOperations jdbcOperations) {
+        this.config = config;
+        this.jdbcOperations = jdbcOperations;
+        qe = new QueryExecutor(this);
+        ce = new CallExecutor(this);}
+    JdbcOperations getJdbcOperations() { return jdbcOperations; }
+    Sfqt2lProcessor getConfig() { return config; }
+    public FetchedResultSet query(String sql) {return qe.executeQuery(sql);}
+    public FetchedResultSet query(String sql, List binds) {return qe.executeQuery(sql, binds);}
+    public Map call(String statement, Map inBinds, Map outBinds) {return ce.executeCall(statement, inBinds, outBinds);}
+}
+-------------------
+import org.springframework.jdbc.core.JdbcOperations;
+import sfqtl.Sfqt2lProcessor;
+public class ConnectionAdapter {
+    private final Sfqt2lProcessor config;
+    private final JdbcOperations jdbcOperations;
+    private final QueryExecutor qe;
+    private final CallExecutor ce;
+    public ConnectionAdapter(Sfqt2lProcessor config, JdbcOperations jdbcOperations) {
+        this.config = config;
+        this.jdbcOperations = jdbcOperations;
+        qe = new QueryExecutor(this);
+        ce = new CallExecutor(this);}
+    JdbcOperations getJdbcOperations() { return jdbcOperations; }
+    Sfqt2lProcessor getConfig() { return config; }
+    public FetchedResultSet query(String sql) {return qe.executeQuery(sql);}
+    public FetchedResultSet query(String sql, List binds) {return qe.executeQuery(sql, binds);}
+    public Map call(String statement, Map inBinds, Map outBinds) {return ce.executeCall(statement, inBinds, outBinds);}
+}
+------------------------- Connector не нужен
+import sfqtl.ext.FtlDefaultObjectWrapper;
+public class FetchedResultSet {
+    private final List<ColumnMeta> meta;
+    private final Map<String, Integer> columnIndices;
+    private final List<List<Object>> rows;
+    FetchedResultSet(ResultSet rs, FtlDefaultObjectWrapper ftlDefaultObjectWrapper) throws SQLException {
+        try {this.meta = Collections.unmodifiableList(ColumnMeta.of(rs.getMetaData()));
+            final int columnCount = meta.size();
+            Map<String, Integer> tempColumnIndices = new HashMap<>(columnCount, 1);
+            for (int i = 0; i < columnCount; i++) {
+                String columnLabel = meta.get(i).getColumnLabel();
+                // if two columns have same labels, save only the 1st one
+                tempColumnIndices.putIfAbsent(columnLabel, i);}
+            List<List<Object>> tempRows = new ArrayList<>(64);
+            while (rs.next()) {
+                List<Object> row = new ArrayList<>(columnCount);
+                for (int i = 0; i < columnCount; i++) {
+                    Object o = rs.getObject(i + 1);
+                    if (o instanceof ResultSet) {o = new FetchedResultSet((ResultSet) o, ftlDefaultObjectWrapper);}
+                    row.add(o);}
+                tempRows.add(Collections.unmodifiableList(row));}
+            this.rows = Collections.unmodifiableList(tempRows);
+            this.columnIndices = Collections.unmodifiableMap(tempColumnIndices);} finally {
+            if (!rs.isClosed()) {rs.close();}}}
+    public List<String> getColumnLabels() {return meta.stream().map(ColumnMeta::getColumnLabel).collect(Collectors.toList());}
+    public Integer getColumnIndex(String label) {
+        return columnIndices.get(label);
+    }
+    public Integer findColumn(String label) {Integer index = getColumnIndex(label);
+        if (index == null) return null;
+        return index + 1;}}
+----------------------
+import freemarker.core.CollectionAndSequence;
+import freemarker.ext.beans.BeanModel;
+import freemarker.ext.beans.BeansWrapper;
+import freemarker.template.*;
+import org.springframework.util.Assert;
+public class FetchedResultSetModel extends BeanModel implements TemplateSequenceModel, TemplateScalarModel {
+    private final ObjectWrapper objectWrapper;
+    private final FetchedResultSet frs;
+    public FetchedResultSetModel(FetchedResultSet frs, BeansWrapper objectWrapper) {
+        super(frs, objectWrapper);
+        this.objectWrapper = objectWrapper;
+        this.frs = frs;
+    }
+    public TemplateModel get(int index) {return new FetchedResultSetRowModel(frs, index, objectWrapper);}
+    public int size() {return frs.getRows().size();}
+    private static final String TRANSPOSE_METHOD_NAME = "transpose";
+    public TemplateModel get(String key) throws TemplateModelException {
+        if (key.equals(TRANSPOSE_METHOD_NAME)) {return transpose();}
+        return super.get(key);}
+    private TemplateMethodModelEx transpose() {
+        return args -> {Assert.isTrue(args.isEmpty(), () -> "No arguments needed, but args=" + args);
+                return wrap(new FetchedResultSetTransposed(frs));};}
+    public TemplateCollectionModel keys() {
+        Set<String> keySetEx = super.keySet();
+        keySetEx.add(TRANSPOSE_METHOD_NAME);
+        return new CollectionAndSequence(new SimpleSequence(keySetEx, objectWrapper));}
+    public TemplateCollectionModel values() {return new SimpleCollection(new ArrayList(0), objectWrapper);}
+    public String getAsString() {StringBuilder sb = new StringBuilder();
+        frs.getColumnLabels().forEach(cl -> sb.append(cl).append('\t'));
+        sb.append('\n');
+        frs.getRows().forEach(row -> {row.forEach(columnVal -> sb.append(columnVal).append('\t'));
+                                        sb.append('\n');});
+        return sb.toString();}}                   
+----------------------------------------
+import freemarker.template.*;
+public class FetchedResultSetRowModel extends WrappingTemplateModel implements TemplateSequenceModel, TemplateHashModelEx {
+    private final FetchedResultSet resultSet;
+    private final int rowIndex;
+    FetchedResultSetRowModel(FetchedResultSet frs, int index, ObjectWrapper wrapper) {
+        super(wrapper);
+        this.resultSet = frs;
+        this.rowIndex = index;}
+    public TemplateModel get(int index) throws TemplateModelException {return wrap(resultSet.getRows().get(rowIndex).get(index));}
+    public TemplateModel get(String key) throws TemplateModelException {return wrap(resultSet.getRows().get(rowIndex).get(resultSet.getColumnIndex(key)));}
+    public int size() {return resultSet.getColumnLabels().size();}
+    public TemplateCollectionModel keys() {return new SimpleCollection(resultSet.getColumnLabels(), getObjectWrapper());}
+    public TemplateCollectionModel values() {return new SimpleCollection(resultSet.getRows().get(rowIndex), getObjectWrapper());}
+    public boolean isEmpty() {return false;}}
+-----------------
+public class FetchedResultSetTransposed {
+    private final FetchedResultSet resultSet;
+    private final List<List<Object>> transposedData;
+    FetchedResultSetTransposed(FetchedResultSet frs) {
+        this.resultSet = frs;
+        int columnsCount = frs.getMetaData().size();
+        List<List<Object>> tempTransposedData = new ArrayList<>();
+        this.transposedData = Collections.unmodifiableList(tempTransposedData);
+        List<List<Object>> origRows = frs.getRows();
+        IntStream.range(0, columnsCount).forEach(
+            columnIndex -> {
+                List<Object> columnData = new ArrayList<>(origRows.size());
+                origRows.forEach(row -> columnData.add(row.get(columnIndex)));
+                tempTransposedData.add(Collections.unmodifiableList(columnData));});}
+    public List<List<Object>> getTransposedData() {return transposedData;}
+    FetchedResultSet getResultSet() {return resultSet;}}
+----------------------------------------
+import freemarker.template.*;
+public class FetchedResultSetTransposedModel extends WrappingTemplateModel
+    implements TemplateSequenceModel, TemplateHashModelEx {
+    private final FetchedResultSetTransposed frst;
+    public FetchedResultSetTransposedModel(FetchedResultSetTransposed frst, ObjectWrapper wrapper) {
+        super(wrapper);
+        this.frst = frst;}
+    public TemplateModel get(int columnIndex) throws TemplateModelException {return wrap(frst.getTransposedData().get(columnIndex));}
+    public TemplateModel get(String key) throws TemplateModelException {return wrap(frst.getTransposedData().get(frst.getResultSet().getColumnIndex(key)));}
+    public int size() {return frst.getTransposedData().size();}
+    public TemplateCollectionModel keys() {return new SimpleCollection(frst.getResultSet().getColumnLabels(), getObjectWrapper());}
+    public TemplateCollectionModel values() {return new SimpleCollection(frst.getTransposedData(), getObjectWrapper());}
+    public boolean isEmpty() {return frst.getTransposedData().isEmpty();}}       
+-----------------------
+package sfqtl.ext.sql;
+import sfqtl.Sfqt2lException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Date;
+import java.util.List;
+public class QueryExecutor {
+    private final ConnectionAdapter connectionAdapter;
+    QueryExecutor(ConnectionAdapter connectionAdapter) {
+        this.connectionAdapter = connectionAdapter;
+    }
+    public FetchedResultSet executeQuery(String query) {
+        return executeQuery(query, null);
+    }
+    public FetchedResultSet executeQuery(String query, List binds) {
+        if (query == null || "".equals(query.trim())) {
+            throw new Sfqt2lException("Unable to execute empty query");
+        }
+       return
+            connectionAdapter.getJdbcOperations().query(
+                connection -> {
+                    PreparedStatement ps = connection.prepareStatement(query);
+                    if (binds != null && !binds.isEmpty()) {
+                        int index = 1;
+                        for (Object o : binds) {
+                            // JDBC can't work with java.util.Date directly
+                            if (o instanceof Date) o = TypeHelper.toSQLDate((Date) o);
+                            ps.setObject(index++, o);
+                        }
+                    }
+                    return ps;
+                },
+                (ResultSet rs) -> new FetchedResultSet(rs, connectionAdapter.getConfig().getFtlDefaultObjectWrapper())
+            );
+    }
+}
+------------------------StructModel не измененно--------------------------                
+package sfqtl.ext.sql;
+import org.junit.platform.commons.util.ExceptionUtils;
+import org.springframework.util.Assert;
+import sfqtl.Sfqt2lException;
+import java.lang.reflect.Field;
+import java.sql.Types;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+public class TypeHelper {
+    private TypeHelper() { }
+    // Map of SQL type names to their int values.
+    private static final Map<String, Object> encoder = new HashMap<>();
+    static {
+        Field[] fields = Types.class.getFields();
+        for (Field field : fields) {
+            try {
+                String name = field.getName();
+                Object value = field.get(null);
+                if (value instanceof Integer) {
+                    encoder.put(name, value);
+                }
+            } catch (IllegalAccessException e) {
+                throw new Sfqt2lException("Unable to create map of SQL type names to int values", e);
+            }
+        }
+    }
+    public static Integer getIntValue(String typeName) {
+        Integer ret = (Integer) encoder.get(typeName);
+        if (ret == null) {
+            ret = extractConstant(typeName);
+            encoder.put(typeName, ret);
+        }
+        return ret;
+    }
+    private static Integer extractConstant(String typeName) {
+        int lastDotPos = typeName.lastIndexOf('.');
+        Assert.isTrue(
+            lastDotPos >= 1,
+            () ->
+                "Type constant is not member of " + Types.class.getName()
+                + " and its name is not fully specified: " + typeName
+        );
+        String className = typeName.substring(0, lastDotPos);
+        String fieldName = typeName.substring(lastDotPos + 1);
+        Integer val = reflectionOp(className, fieldName);
+        if (val == null) throw new NullPointerException(typeName);
+        return val;
+    }
+    private static Integer reflectionOp(String className, String fieldName) {
+        try {
+            Class cls = Class.forName(className);
+            return (Integer) cls.getField(fieldName).get(null);
+        } catch (Exception e) {
+            throw ExceptionUtils.throwAsUncheckedException(e);
+        }
+    }
+    public static java.util.Date toSQLDate(java.util.Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        long millis = cal.getTimeInMillis();
+        boolean hasTimePart =
+            cal.get(Calendar.HOUR_OF_DAY) + cal.get(Calendar.MINUTE)
+            + cal.get(Calendar.SECOND) + cal.get(Calendar.MILLISECOND) != 0;
+        return hasTimePart ? new java.sql.Timestamp(millis) : new java.sql.Date(millis);
+    }
+}
+------------- FtlDefaultObjectWrapper = DefaultObjectWrapper-----------------------------
+------------------------- SharedHash не изменено-------------------------------------------------------------------------------------------
+public class Sfqt2lException extends RuntimeException {
+    public Sfqt2lException(String message) {        super(message);}
+    public Sfqt2lException(String message, Throwable cause) {super(message, cause);}
+}
+-----------------
+package sfqtl;
+
+import freemarker.cache.ClassTemplateLoader;
+import freemarker.cache.NullCacheStorage;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.template.*;
+import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.util.Assert;
+import sfqtl.ext.FtlDefaultObjectWrapper;
+import sfqtl.ext.SharedHash;
+import sfqtl.ext.sql.ConnectionAdapter;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+
+public class Sfqt2lProcessor extends Configuration {
+    private final ConnectionAdapter defaultConnection;
+    public Sfqt2lProcessor(JdbcOperations jdbcOperations) {
+        super(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+        this.defaultConnection = new ConnectionAdapter(this, jdbcOperations);
+        // Set default settings
+        setObjectWrapper(new FtlDefaultObjectWrapper(this.getIncompatibleImprovements()));
+        setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+        setLocalizedLookup(false);
+        this.setTemplateLoader(new ClassTemplateLoader(this.getClass(), "/"));
+        this.setLocalizedLookup(false);
+        setDefaultEncoding("UTF8");
+        setNumberFormat("computer");
+        setDateFormat("yyyy-MM-dd");
+        setDateTimeFormat("yyyy-MM-dd HH:mm:ss");
+        setCacheStorage(new NullCacheStorage());
+        // Register user-defined variables and methods
+        registerSharedVar("shared_hash", new SharedHash());
+        registerSharedVar("static", getGetStaticMethod());
+        setSharedVariable("default_connection", getGetDefaultConnectionMethod());
+    }
+    @Override
+    public Template getTemplate(String templateName) {
+        try {
+            return super.getTemplate(templateName);
+        } catch (IOException e) {
+            throw new Sfqt2lException(String.format("Unable to get template '%s'", templateName), e);
+        }
+    }
+    public Template getTemplateFromString(String templateName, String templateBody) {
+        if (templateBody == null) {
+            throw new IllegalArgumentException("Template body is null");
+        }
+        final Template template;
+        try {
+            template = new Template(templateName, templateBody, this);
+        } catch (IOException e) {
+            throw new Sfqt2lException("Unable to create template from pure ftl text", e);
+        }
+        return template;
+    }
+    public String process(Template template, Object...args) {
+        StringWriter sw = new StringWriter();
+        process(template, sw, args);
+        return sw.toString();
+    }
+    public void process(Template template, Writer dest, Object...args) {
+        SimpleHash root = new SimpleHash(getFtlDefaultObjectWrapper());
+        registerSharedVar("template_args", args);
+        try {
+            template.process(root, dest);
+        } catch (IOException | TemplateException e) {
+            throw new Sfqt2lException("ftl processing exception", e);
+        }
+    }
+    public void registerSharedVar(String name, Object val) {
+        try{
+            setSharedVariable(name, val);
+        } catch(TemplateModelException e){
+            throw new Sfqt2lException("Unable to register " + name + " variable", e);
+        }
+    }
+    public FtlDefaultObjectWrapper getFtlDefaultObjectWrapper() {
+        return (FtlDefaultObjectWrapper) this.getObjectWrapper();
+    }
+    private TemplateMethodModelEx getGetDefaultConnectionMethod() {
+        return
+            args -> {
+                Assert.isTrue(
+                    args.isEmpty(),
+                    () -> "Wrong number of arguments: expected 0, got " + args.size()
+                );
+                return defaultConnection;
+            };
+    }
+    private TemplateMethodModelEx getGetStaticMethod() {
+        return
+            args -> {
+                Assert.isTrue(args.size() == 1, () -> "Wrong number of arguments: expected 1, got " + args.size());
+                Object classNameObj = args.get(0);
+                Assert.isTrue(
+                    classNameObj instanceof TemplateScalarModel,
+                    () -> "Illegal type of argument #1: expected string, got " + classNameObj.getClass().getName()
+                );
+                return
+                    new BeansWrapperBuilder(getIncompatibleImprovements()).build()
+                        .getStaticModels().get(((TemplateScalarModel) classNameObj).getAsString());
+            };
+    }
+}
+--------------sfqtl\orasql.ftl---------------------
+<#--
+-- This library contains functions and macros for working with SQL.
+--->
+
+<#--
+-- Executes the specified SQL query within the default connection. This is a
+-- convenience method for default_connection().query(...).
+--
+-- @param  sql    the SQL query statement
+-- @param  binds  the sequence of bind variable values
+-- @return        the result set
+--->
+<#function query sql binds = []>
+  <#return default_connection().query(sql, binds)/>
+</#function>
+
+
+<#--
+-- Executes the specified PL/SQL call within the default connection. This is a
+-- convenience method for default_connection().call(...).
+--
+-- @param  statement  the callable statement to be executed
+-- @param  in_binds   the map of in bind variable indices to their values
+-- @param  out_binds  the map of out bind variable indices to their type names
+-- @return            a map of out bind variable indices to their values
+--->
+<#function call statement in_binds out_binds>
+  <#return default_connection().call(statement, in_binds, out_binds)/>
+</#function>
+
+
+<#--
+-- Evaluates the specified SQL-compatible expression or function as a scalar
+-- query, i.e. select expr from dual. The returning type is automatically
+-- determined.
+--
+-- @param  expr  the expression or the function's name
+-- @param  args  the list of the function's parameters (optional)
+-- @return       the result of the query as a scalar; if the function returns
+--               REF CURSOR, the result is returned as a ResultSet object
+--->
+<#function scalar expr args>
+  <#local
+    sql_statement = 'select ' + expr +
+      args?has_content?then('('?right_pad(args?size*3 - 1, ' ?,') + ')', '') +
+      ' from dual'
+  />
+  <#local res = query(sql_statement, args)/>
+  <#if res[0][0]??>
+    <#return res[0][0]/>
+  <#else>
+    <#-- return null -->
+  </#if>
+</#function>
+
+<#--
+-- Converts the specified sequence to an SQL collection of the specified type.
+--
+-- @param  typ  the collection's type (stored UDT)
+-- @param  seq  the sequence to be converted to a collection
+-- @return      a collection of the specified type containing the sequence
+--->
+<#function collect typ seq>
+  <#local
+    sql_statement = 'select ' + typ + '(' +
+      seq?has_content?then(''?right_pad(seq?size*3 - 2, '?, '), '') +
+      ') from dual'
+  />
+  <#return query(sql_statement, seq)[0][0]/>
+</#function>
+
+
+<#--
+-- Evaluates the specified PL/SQL expression or function. The returning type
+-- must be provided as the first argument. Should be used instead of 'scalar'
+-- function when the expression or the function are incompatible with the pure
+-- SQL (e.g. for accessing a package variable or passing/returning a boolean).
+-- In contrast to Native Dynamic SQL you can call functions that have boolean
+-- arguments; the sys.diutil package is used for bool2int/int2bool conversion.
+--
+-- @param  typ   the returning type, which is a constant from java.sql.Types or
+--               oracle.jdbc.OracleTypes (in the latter case specified with the
+--               full namespace), e.g. NUMERIC or oracle.jdbc.OracleTypes.CURSOR
+-- @param  expr  the expression or the function's name
+-- @param  args  the list of the function's parameters (optional)
+-- @return       the result of the evaluation
+--->
+<#function eval typ expr args = []>
+ <#local is_bool_ret = (typ == 'BOOLEAN')/>
+  <#local callable_statement = expr/>
+  <#list args as arg>
+    <#local
+      callable_statement +=
+        (arg?index == 0)?then('(', '') +
+        arg?is_boolean?then('sys.diutil.int_to_bool(?)', '?') +
+        arg?has_next?then(', ', ')')
+    />
+  </#list>
+  <#local
+    callable_statement = '{? = call ' +
+      is_bool_ret?then('sys.diutil.bool_to_int(', '') + callable_statement +
+      is_bool_ret?then(')', '') + '}'
+  />
+  <#local binds = {}/>
+  <#list args as arg>
+    <#if arg?is_boolean>
+      <#local val = arg?then(1, 0)/>
+    <#else>
+      <#local val = arg/>
+    </#if>
+    <#local binds += {(arg?index + 2)?c : val}/>
+  </#list>
+  <#local
+    res = call(
+      callable_statement, binds, {'1' : is_bool_ret?then('NUMERIC', typ)}
+    )
+  />
+  <#if res['1']??>
+    <#if is_bool_ret>
+      <#return (res['1'] == 1)/>
+    <#else>
+      <#return res['1']/>
+    </#if>
+  <#else>
+    <#-- return null -->
+  </#if>
+</#function>
+
+
+<#--
+-- Fetches the cursor returned by the specified function. This is a convenience
+-- method for eval("oracle.jdbc.OracleTypes.CURSOR", cursor_func, args...).
+--
+-- @param  cursor_func  the function's name
+-- @param  args         the list of the function's parameters (optional)
+-- @return              the result as a ResultSet object
+--->
+<#function fetch cursor_func args = []>
+  <#return eval("oracle.jdbc.OracleTypes.CURSOR", cursor_func, args)/>
+</#function>
+--------------sfqtl\std.ftl---------------------
+<#--
+-- This library contains standard functions and macros for usual purposes.
+-->
+
+<#-- The default TAB size (the number of spaces) -->
+<#assign DEFAULT_TAB_SIZE = 2/>
+
+
+<#--
+-- Returns the actual TAB size redefined by the global TAB_SIZE variable.
+--
+-- @return  the actual TAB size
+-->
+<#function tab_size>
+  <#return .globals.TAB_SIZE!DEFAULT_TAB_SIZE/>
+</#function>
+
+
+<#--
+-- Returns the least of one or more expressions.
+--
+-- @param  x  the first expression (mandatory)
+-- @param  v  the rest of expressions (optional)
+-- @return    the least value
+-->
+<#function least x v...>
+  <#local res = x/>
+  <#list v as y>
+    <#if (y < res)>
+      <#local res = y/>
+    </#if>
+  </#list>
+  <#return res/>
+</#function>
+
+
+<#--
+-- Returns the greatest of one or more expressions.
+--
+-- @param  x  the first expression (mandatory)
+-- @param  v  the rest of expressions (optional)
+-- @return    the greatest value
+-->
+<#function greatest x v...>
+  <#local res = x/>
+  <#list v as y>
+    <#if (y > res)>
+      <#local res = y/>
+    </#if>
+  </#list>
+  <#return res/>
+</#function>
+
+
+<#--
+-- Removes spaces from the left end of the specified string.
+--
+-- @param  str  the string to be trimmed
+-- @return      the trimmed string
+-->
+<#function ltrim str>
+  <#return str?replace('^\\s*', '', 'r')/>
+</#function>
+
+
+<#--
+-- Removes spaces from the right end of the specified string.
+--
+-- @param  str  the string to be trimmed
+-- @return      the trimmed string
+-->
+<#function rtrim str>
+  <#return str?replace('\\s*$', '', 'r')/>
+</#function>
+
+
+<#--
+-- Formats the elements of the specified sequence and concatenates them using
+-- the specified delimiter.
+--
+-- @param  seq     the sequence to be concatenated
+-- @param  format  the format mask of a sequence element
+-- @param  delim   the delimiter
+-- @param  token   the placeholder for a sequence element in the format mask
+-- @return         the list of the sequence elements
+--->
+<#function to_list
+  seq
+  format = '%'
+  delim = ', '
+  token = '%'
+>
+  <#local lst = ''/>
+  <#list seq as it>
+    <#local lst += format?replace(token, it) + it?has_next?then(delim, '')/>
+  </#list>
+  <#return lst/>
+</#function>
+
+
+<#--
+-- Indents the content with the specified shift.
+--
+-- @param  lshift  the number of left shifts (one space)
+-- @param  rshift  the number of right shifts (one space)
+-- @param  ltab    the number of left tabs
+-- @param  rtab    the number of right tabs
+-->
+<#macro indent
+  lshift = 0
+  rshift = 0
+  ltab = 0
+  rtab = 0
+>
+  <#local output = ''/>
+  <#local indent_width = (rshift - lshift) + (rtab - ltab)*tab_size()/>
+  <#local content><#nested/></#local>
+  <#list content?split('\n') as it>
+    <#if it?has_next || (it?trim != '')>
+      <#if (indent_width >= 0)>
+        <#local
+           output += ''?right_pad(indent_width) + it +
+             it?has_next?then('\n', '')
+        />
+      <#else>
+        <#local
+           output +=
+             it?replace('^ {1,' + (-indent_width)?c + '}', '', 'r') +
+             it?has_next?then('\n', '')
+        />
+      </#if>
+    </#if>
+  </#list>
+ <#t/>${output}
+</#macro>
+
+
+<#--
+-- Formats the content as a list of elements separated by a delimiter.
+--
+-- @param  split_ptrn      the regexp pattern for splitting the list into
+--                         elements
+-- @param  delim           the new delimiter
+-- @param  trailing_delim  if true puts the delimiter at the end of the list
+-- @param  max_len         the maximum line length
+-- @param  keep_indent     if true puts the indent of the first line before
+--                         each of the rest lines (the indent may changed by
+--                         setting the following parameters)
+-- @param  lshift          the number of left shifts (one space)
+-- @param  rshift          the number of right shifts (one space)
+-- @param  ltab            the number of left tabs
+-- @param  rtab            the number of right tabs
+-->
+<#macro format_list
+  split_ptrn = '\\s*,\\s*'
+  delim = ', '
+  trailing_delim = false
+  max_len = 80
+  keep_indent = true
+  lshift = 0
+  rshift = 0
+  ltab = 0
+  rtab = 0
+>
+  <#local output = ''/>
+  <#local len = 0/>
+  <#local delim_rt = rtrim(delim)/>
+  <#local delim_ws = ''?right_pad(delim?length - delim_rt?length)/>
+  <#local content><#nested/></#local>
+  <#local
+    indent = ''?right_pad(
+      greatest(
+        keep_indent?then(content?matches('^ *')[0]?length, 0) +
+          (rshift - lshift) + (rtab - ltab)*tab_size(),
+        0
+      )
+    )
+  />
+  <#list content?trim?split(split_ptrn, 'ri') as it>
+    <#local str = it + (it?has_next || trailing_delim)?then(delim_rt, '')/>
+    <#if (len == 0) || ((str + delim_ws)?length <= max_len - len)>
+      <#local str = (it?index == 0)?then(indent, delim_ws) + str/>
+      <#local len += str?length/>
+    <#else>
+      <#local str = '\n' + keep_indent?then(indent, '') + str/>
+      <#local len = str?length - 1/>
+    </#if>
+    <#local output += str/>
+  </#list>
+  <#lt/>${output}
+</#macro>
+
+<#--
+-- Includes the specified template passing the specified arguments to it. This
+-- macro should be used instead of the built-in #include directive for including
+-- parameterized templates that use the "template_args" shared variable inside.
+--
+-- @param  name            the template name
+-- @param  args            the sequence of arguments
+-- @param  ignore_missing  if true doesn't throw an exception when the template
+--                         is not found, otherwise does
+-- @param  parse           if true processes the template, otherwise only prints
+-- @param  encoding        overrides the encoding of the top-level template
+-- @param  skip            extra stack levels to skip while determining the
+--                         proper abs path of the included template
+-->
+<#macro include
+  name
+  args = []
+  ignore_missing = false
+  parse = true
+  encoding = ''
+  skip = 0
+>
+  <#local name = to_abs_name(name, skip + 1)/>
+  <#local template_args = args/>
+  <#if encoding == ''>
+    <#include
+      name
+      ignore_missing = ignore_missing
+      parse = parse
+    />
+  <#else>
+    <#include
+      name
+      ignore_missing = ignore_missing
+      parse = parse
+      encoding = encoding
+    />
+  </#if>
+</#macro>

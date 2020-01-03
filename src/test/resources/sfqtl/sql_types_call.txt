@@ -1,0 +1,16 @@
+Execute call with variety of in/out-bind variables.
+
+Print out bind variables:
+{
+  number : 2
+  string : abcx
+  date : 12.03.2000
+  collection : ['a', 'b', 'c', 'd']
+  cursor : {
+    row#1: "DT" = 02.03.2015 -- 1
+    row#2: "DT" = 03.03.2015 -- 2
+    row#3: "DT" = 04.03.2015 -- 3
+    row#4: "DT" = 05.03.2015 -- 4
+    row#5: "DT" = 06.03.2015 -- 5
+  }
+}

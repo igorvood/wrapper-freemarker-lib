@@ -1,0 +1,38 @@
+Print columns and their corresponding SQL types:
+{
+    BYTE : NUMBER
+    SHRT : NUMBER
+    INT : NUMBER
+    LNGINT : NUMBER
+    FLT : NUMBER
+    DBL : NUMBER
+    BIGDEC : NUMBER
+    DT : DATE
+    TMSTMP : TIMESTAMP
+    STR : VARCHAR2
+    BOOL : NUMBER
+    COLL : SYS.ODCINUMBERLIST
+    STRUCT : SYS.ODCIOBJECT
+    CLOB : CLOB
+}
+
+Print passed types and returned values.
+{
+  byte : 1
+  short : 1
+  int : 1
+  longint : 1
+  float : 1.2
+  double : 1.2
+  numeric : 1.56
+  date : 31.03.2055 03:25:43
+  timestamp : 2012-03-31 17:23:39.544
+      timestamp is datetime? - false
+      timestamp is string? - true
+  string : текст по русски
+  boolean : 1
+      boolean is int? - true
+  collection = [1, 2, 3]
+  struct = {field#1 : "goose", field#2 : "гусь"}
+  clob = текст для Клоба
+}

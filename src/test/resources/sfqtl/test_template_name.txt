@@ -1,0 +1,1 @@
+this template name is sfqtl/test_template_name.ftl

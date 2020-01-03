@@ -1,0 +1,3 @@
+java.lang.Math.sqrt(123) = 11.090536506409418
+java.lang.Math.pow(3, 5) = 243
+java.math.RoundingMode.UP = UP

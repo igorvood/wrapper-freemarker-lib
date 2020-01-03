@@ -1,0 +1,4 @@
+Fetch SQL collection from query.
+Print SQL collection: [3 _+~ <NULL> _+~ 1 _+~ 7 _+~ -127 _+~ 42]
+SQL collection type: SYS.ODCINUMBERLIST
+SQL collection base type: NUMBER

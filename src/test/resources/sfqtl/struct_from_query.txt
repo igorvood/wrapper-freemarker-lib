@@ -1,0 +1,3 @@
+Fetch SQL structure (object type) from query.
+Print SQL structure: {field#1 : "goose", field#2 : "гусь"}
+SQL structure type: SYS.ODCIOBJECT

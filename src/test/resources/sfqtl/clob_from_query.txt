@@ -1,0 +1,4 @@
+Fetch CLOB from query.
+Print CLOB: "loooong text
+ русский текст"
+CLOB length: 27
