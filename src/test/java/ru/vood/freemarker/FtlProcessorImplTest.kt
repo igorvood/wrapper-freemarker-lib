@@ -7,7 +7,7 @@ import java.util.*
 
 internal class FtlProcessorImplTest {
 
-    private lateinit var ftlProcessor: FtlProcessor
+    private lateinit var ftlProcessor: TemplateProcessor
 
     @BeforeEach
     fun setUp() {
@@ -16,7 +16,7 @@ internal class FtlProcessorImplTest {
 
     @Test
     fun processFileNoParam() {
-        val processFile = ftlProcessor.processFile("ru/vood/freemarker/FtlProcessorImplTest/FtlProcessorImplTestNoParam.ftl")
+        val processFile = ftlProcessor.processFile(fileName = "ru/vood/freemarker/FtlProcessorImplTest/FtlProcessorImplTestNoParam.ftl")
         Assertions.assertEquals("--NO PARAM--", processFile)
     }
 
