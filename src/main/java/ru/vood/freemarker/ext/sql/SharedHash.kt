@@ -1,4 +1,4 @@
-package ru.vood.freemarker.ext
+package ru.vood.freemarker.ext.sql
 
 import java.util.*
 

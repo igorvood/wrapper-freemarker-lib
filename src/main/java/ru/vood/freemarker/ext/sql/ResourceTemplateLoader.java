@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ru.vood.freemarker.ext;
+package ru.vood.freemarker.ext.sql;
 
 
 import freemarker.cache.ClassTemplateLoader;
