@@ -64,7 +64,7 @@ public class CallExecutor {
                         ret.put(String.valueOf(index), retBind); }
                     return ret; } );   }}
 ++++++++++++++++++++++++++----------ClobModel не изменено-------------------------------------------------------------------------------------------
-public class ColumnMeta {
++++++++++++++++++++++++++++++++++++++++++++++++public class ColumnMeta {
     private final boolean autoIncrement;
     private final int nullable;
     private final boolean signed;
