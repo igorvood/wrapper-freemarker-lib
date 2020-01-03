@@ -10,7 +10,6 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 
 
-
 @Configuration
 @PropertySource("sfqtl/db_connection.properties")
 class TestConfig {

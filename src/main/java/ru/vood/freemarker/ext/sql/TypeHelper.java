@@ -15,6 +15,7 @@
  */
 package ru.vood.freemarker.ext.sql;
 
+import org.springframework.util.Assert;
 
 import java.lang.reflect.Field;
 import java.sql.Types;
@@ -27,37 +28,28 @@ import java.util.Map;
  * A helper class for working with SQL types.
  */
 public class TypeHelper {
-
-
     // Map of SQL type names to their int values.
-    private static final Map encoder = new HashMap();
-
+    private static final Map<String, Object> encoder = new HashMap<>();
 
     static {
         Field[] fields = Types.class.getFields();
-        for (int i = 0; i < fields.length; i++) {
+        for (Field field : fields) {
             try {
-                String name = fields[i].getName();
-                Object value = fields[i].get(null);
+                String name = field.getName();
+                Object value = field.get(null);
                 if (value instanceof Integer) {
                     encoder.put(name, value);
                 }
             } catch (IllegalAccessException e) {
-                throw new RuntimeException("Unable to create map of SQL type names to int values", e);
+                throw new Sfqt2lException("Unable to create map of SQL type names to int values", e);
             }
         }
     }
 
+    private TypeHelper() {
+    }
 
-    /**
-     * Returns an int value for the specified type name from {@link Types} or any other class containing
-     * SQL type constants, for example {@link oracle.jdbc.OracleTypes}.
-     *
-     * @param typeName the constant name (fully specified, if not from {@link Types})
-     * @return the corresponding Integer value
-     * @throws Exception if a constant with the given name is not found, not accessible, not of int type or is null
-     */
-    public static Integer getIntValue(String typeName) throws Exception {
+    public static Integer getIntValue(String typeName) {
         Integer ret = (Integer) encoder.get(typeName);
         if (ret == null) {
             ret = extractConstant(typeName);
@@ -66,39 +58,37 @@ public class TypeHelper {
         return ret;
     }
 
-
-    private static Integer extractConstant(String typeName) throws Exception {
-        int lastDotPos = typeName.lastIndexOf(".");
-        if (lastDotPos < 1) {
-            throw new IllegalArgumentException("Type constant is not member of " + Types.class.getName()
-                    + " and its name is not fully specified: " + typeName);
-        }
-
+    private static Integer extractConstant(String typeName) {
+        int lastDotPos = typeName.lastIndexOf('.');
+        Assert.isTrue(
+                lastDotPos >= 1,
+                () ->
+                        "Type constant is not member of " + Types.class.getName()
+                                + " and its name is not fully specified: " + typeName
+        );
         String className = typeName.substring(0, lastDotPos);
         String fieldName = typeName.substring(lastDotPos + 1);
-
-        Class cls = Class.forName(className);
-        Integer val = (Integer) cls.getField(fieldName).get(null);
-
+        Integer val = reflectionOp(className, fieldName);
         if (val == null) throw new NullPointerException(typeName);
         return val;
     }
 
+    private static Integer reflectionOp(String className, String fieldName) {
+        try {
+            Class cls = Class.forName(className);
+            return (Integer) cls.getField(fieldName).get(null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-    /**
-     * Returns the specified object as an instance of an SQL-compatible subclass of {@link java.util.Date}:
-     * either {@link java.sql.Date} or {@link java.sql.Timestamp}, depending on the presence of the time part.
-     *
-     * @param date the value to be converted
-     * @return an SQL-compatible object
-     */
     public static java.util.Date toSQLDate(java.util.Date date) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         long millis = cal.getTimeInMillis();
-        boolean hasTimePart = cal.get(Calendar.HOUR_OF_DAY) + cal.get(Calendar.MINUTE)
-                + cal.get(Calendar.SECOND) + cal.get(Calendar.MILLISECOND) != 0;
-        return hasTimePart ? (java.util.Date) new java.sql.Timestamp(millis) : new java.sql.Date(millis);
+        boolean hasTimePart =
+                cal.get(Calendar.HOUR_OF_DAY) + cal.get(Calendar.MINUTE)
+                        + cal.get(Calendar.SECOND) + cal.get(Calendar.MILLISECOND) != 0;
+        return hasTimePart ? new java.sql.Timestamp(millis) : new java.sql.Date(millis);
     }
-
 }

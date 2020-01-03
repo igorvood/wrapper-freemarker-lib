@@ -13,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
+import ru.vood.freemarker.ext.sql.Sfqt2lProcessor;
 
 import javax.sql.DataSource;
 import java.io.IOException;

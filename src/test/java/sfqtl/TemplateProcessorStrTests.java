@@ -3,6 +3,7 @@ package sfqtl;
 import freemarker.template.Template;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import ru.vood.freemarker.ext.sql.Sfqt2lException;
 
 class TemplateProcessorStrTests extends AbstractTests {
 
