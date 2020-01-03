@@ -6,7 +6,7 @@ import java.io.File
 import java.io.StringWriter
 import java.util.*
 
-class FtlProcessorImpl(val cfg: Configuration) : FtlProcessor {
+class FtlProcessorImpl(val cfg: Configuration) : TemplateProcessor {
 
     constructor() : this(Configuration(Configuration.VERSION_2_3_29))
 

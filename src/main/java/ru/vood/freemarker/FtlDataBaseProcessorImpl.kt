@@ -9,7 +9,7 @@ class FtlDataBaseProcessorImpl(
         val jdbcDriver: String,
         val url: String,
         private val user: String,
-        private val password: String) : FtlProcessor {
+        private val password: String) : TemplateProcessor {
 
     override fun processFile(file: File, args: Array<Any?>?): String {
         val forName = Class.forName(jdbcDriver)
