@@ -1,4 +1,4 @@
-﻿--------ArrayModel не измененно--------------------------
+﻿++++++++++++++++++++++++--------ArrayModel не измененно--------------------------
 import org.springframework.jdbc.core.CallableStatementCallback;
 import sfqtl.Sfqt2lException;
 public class CallExecutor {
@@ -63,7 +63,7 @@ public class CallExecutor {
                         }
                         ret.put(String.valueOf(index), retBind); }
                     return ret; } );   }}
-----------ClobModel не изменено-------------------------------------------------------------------------------------------
+++++++++++++++++++++++++++----------ClobModel не изменено-------------------------------------------------------------------------------------------
 public class ColumnMeta {
     private final boolean autoIncrement;
     private final int nullable;
