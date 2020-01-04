@@ -19,7 +19,7 @@ import java.util.*
 ` *
 </pre> *
  */
-class SharedHash {
+class SharedHash111 {
     private val storage: MutableMap<String, Any> = HashMap()
     /**
      * Saves the specified key value into the storage.
