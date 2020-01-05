@@ -3,6 +3,7 @@ package ru.vood.freemarker
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import ru.vood.freemarker.ext.sql.SqlFtlException
 import java.util.*
 
 internal class FtlProcessorTest {
@@ -51,7 +52,7 @@ internal class FtlProcessorTest {
 
     @Test
     fun processNotExistsFile() {
-        Assertions.assertThrows(IllegalStateException::class.java)
+        Assertions.assertThrows(SqlFtlException::class.java)
         { ftlProcessor.processFile("qwerty.ftl") }
     }
 }

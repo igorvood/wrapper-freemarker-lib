@@ -1,7 +1,6 @@
 package ru.vood.freemarker
 
 import java.io.File
-import java.util.*
 
 interface TemplateProcessor {
 
@@ -14,7 +13,10 @@ interface TemplateProcessor {
 
     private fun resolveFile(fileName: String): File {
         val resource = javaClass.classLoader.getResource(fileName)
-        Optional.ofNullable(resource).orElseThrow { throw java.lang.IllegalStateException("File $fileName not found") }
+        if (resource == null) {
+            return File(fileName)
+        }
+//        Optional.ofNullable(resource).orElseThrow { throw SqlFtlException("File $fileName not found") }
         return File(resource.path)
     }
 
