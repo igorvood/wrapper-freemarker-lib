@@ -21,6 +21,7 @@ class ColumnMeta private constructor(
 
 
     companion object {
+        @JvmStatic
         fun of(m: ResultSetMetaData): List<ColumnMeta> {
             val toList = IntStream.range(1, m.columnCount + 1)
                     .mapToObj {
@@ -32,7 +33,5 @@ class ColumnMeta private constructor(
                     .toList<ColumnMeta>()
             return toList
         }
-
     }
-
 }
