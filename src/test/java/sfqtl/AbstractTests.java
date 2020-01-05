@@ -13,7 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
-import ru.vood.freemarker.ext.sql.SqlFtlProcessor;
+import ru.vood.freemarker.ext.processor.SpringFtlProcessor;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -32,13 +32,13 @@ abstract class AbstractTests {
 
     @Autowired
     DataSource dataSource;
-    SqlFtlProcessor sqlFtlProcessor;
+    SpringFtlProcessor sqlFtlProcessor;
     private DataSourceTransactionManager transactionManager;
 
     @BeforeAll
     private void setup() {
         JdbcTemplate template = new JdbcTemplate(dataSource);
-        this.sqlFtlProcessor = new SqlFtlProcessor(template);
+        this.sqlFtlProcessor = new SpringFtlProcessor(template);
         this.transactionManager = new DataSourceTransactionManager(dataSource);
     }
 

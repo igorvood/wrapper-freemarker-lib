@@ -1,4 +1,4 @@
-package ru.vood.freemarker.ext.sql;
+package ru.vood.freemarker.ext.processor;
 
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.NullCacheStorage;
@@ -6,15 +6,19 @@ import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.*;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.util.Assert;
+import ru.vood.freemarker.ext.sql.ConnectionAdapter;
+import ru.vood.freemarker.ext.sql.FtlDefaultObjectWrapper;
+import ru.vood.freemarker.ext.sql.SharedHash;
+import ru.vood.freemarker.ext.sql.SqlFtlException;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 
-public class SqlFtlProcessor extends Configuration implements ProcessFtl {
+public class SpringFtlProcessor extends Configuration implements ProcessFtl {
     private final ConnectionAdapter defaultConnection;
 
-    public SqlFtlProcessor(JdbcOperations jdbcOperations) {
+    public SpringFtlProcessor(JdbcOperations jdbcOperations) {
         super(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
         this.defaultConnection = new ConnectionAdapter(this, jdbcOperations);
         // Set default settings

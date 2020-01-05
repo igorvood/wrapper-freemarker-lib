@@ -1,6 +1,7 @@
 package ru.vood.freemarker.ext.sql;
 
 import org.springframework.jdbc.core.JdbcOperations;
+import ru.vood.freemarker.ext.processor.ProcessFtl;
 
 import java.util.List;
 import java.util.Map;

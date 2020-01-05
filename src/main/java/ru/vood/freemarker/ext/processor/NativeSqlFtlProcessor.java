@@ -1,4 +1,4 @@
-package ru.vood.freemarker.ext.sql;
+package ru.vood.freemarker.ext.processor;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.jdbc.core.JdbcOperations;
@@ -9,7 +9,7 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class NativeSqlFtlProcessor extends SqlFtlProcessor {
+public class NativeSqlFtlProcessor extends SpringFtlProcessor {
 
     public NativeSqlFtlProcessor(
             String jdbcDriver,
