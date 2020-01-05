@@ -10,6 +10,7 @@ public class Test {
 //        connection c = null;
         /* регистрация драйвера Oracle */
         Class.forName("oracle.jdbc.driver.OracleDriver");
+
         final Connection c = DriverManager.getConnection(
                 "jdbc:oracle:thin:@prod1:1521:finprod",
                 "user", "user_passwd");
