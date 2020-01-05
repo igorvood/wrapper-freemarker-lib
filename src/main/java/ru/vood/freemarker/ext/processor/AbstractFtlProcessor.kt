@@ -9,7 +9,7 @@ import java.io.IOException
 import java.io.StringWriter
 import java.io.Writer
 
-abstract class AbstractFtlProcessor() : Configuration(DEFAULT_INCOMPATIBLE_IMPROVEMENTS), ProcessFtl {
+abstract class AbstractFtlProcessor : Configuration(DEFAULT_INCOMPATIBLE_IMPROVEMENTS), ProcessFtl {
 
     override fun getTemplate(templateName: String): Template {
         return try {

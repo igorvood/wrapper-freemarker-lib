@@ -1,4 +1,12 @@
 package ru.vood.freemarker
 
-class FtlProcessor {
+import ru.vood.freemarker.ext.processor.SimpleFtlProcessor
+
+class FtlProcessor : TemplateProcessor {
+    var simpleFtlProcessor: SimpleFtlProcessor = SimpleFtlProcessor()
+
+    override fun processFile(fileName: String, vararg args: Any?): String {
+        simpleFtlProcessor.registerSharedVar("args", args)
+        return simpleFtlProcessor.process(simpleFtlProcessor.getTemplate(fileName), args)
+    }
 }

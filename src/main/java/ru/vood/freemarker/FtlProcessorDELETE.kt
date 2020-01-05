@@ -1,16 +1,13 @@
 package ru.vood.freemarker
 
-import freemarker.cache.FileTemplateLoader
 import freemarker.template.Configuration
-import java.io.File
-import java.io.StringWriter
-import java.util.*
 
 class FtlProcessorDELETE(val cfg: Configuration) : TemplateProcessor {
 
     constructor() : this(Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS))
 
-    override fun processFile(file: File, args: Array<Any?>?): String {
+    override fun processFile(file: String, vararg args: Any?): String {
+/*
         if (!file.exists())
             throw IllegalStateException("File ${file.absolutePath} doesn't exists")
         val ftl = FileTemplateLoader(File(file.parent))
@@ -23,6 +20,8 @@ class FtlProcessorDELETE(val cfg: Configuration) : TemplateProcessor {
         val stringWriter = StringWriter()
         template.process(data, stringWriter)
         return stringWriter.buffer.toString()
+*/
+        return ""
     }
 
 

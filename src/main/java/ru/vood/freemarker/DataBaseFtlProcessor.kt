@@ -1,7 +1,6 @@
 package ru.vood.freemarker
 
 import ru.vood.freemarker.ext.processor.NativeSqlFtlProcessor
-import java.io.File
 
 class DataBaseFtlProcessor(
         jdbcDriver: String,
@@ -11,7 +10,7 @@ class DataBaseFtlProcessor(
 
     var nativeSqlFtlProcessor: NativeSqlFtlProcessor = NativeSqlFtlProcessor(jdbcDriver, url, user, password)
 
-    override fun processFile(file: File, args: Array<Any?>?): String {
-        return nativeSqlFtlProcessor.process(nativeSqlFtlProcessor.getTemplate(file.absolutePath), args)
+    override fun processFile(fileName: String, vararg args: Any?): String {
+        return nativeSqlFtlProcessor.process(nativeSqlFtlProcessor.getTemplate(fileName), args)
     }
 }
