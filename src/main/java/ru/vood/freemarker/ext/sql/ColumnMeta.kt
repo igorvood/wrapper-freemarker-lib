@@ -22,7 +22,7 @@ class ColumnMeta private constructor(
 
     companion object {
         fun of(m: ResultSetMetaData): List<ColumnMeta> {
-            return IntStream.range(1, m.columnCount + 1)
+            val toList = IntStream.range(1, m.columnCount + 1)
                     .mapToObj {
                         ColumnMeta(
                                 m.isAutoIncrement(it), m.isNullable(it), m.isSigned(it), m.getColumnLabel(it), m.getColumnName(it),
@@ -30,6 +30,7 @@ class ColumnMeta private constructor(
                                 m.isReadOnly(it), m.isWritable(it), m.isDefinitelyWritable(it), m.getColumnClassName(it))
                     }
                     .toList<ColumnMeta>()
+            return toList
         }
 
     }
