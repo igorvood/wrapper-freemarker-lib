@@ -3,7 +3,7 @@ package sfqtl;
 import freemarker.template.Template;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import ru.vood.freemarker.ext.sql.Sfqt2lException;
+import ru.vood.freemarker.ext.sql.SqlFtlException;
 
 class TemplateProcessorStrTests extends AbstractTests {
 
@@ -58,7 +58,7 @@ class TemplateProcessorStrTests extends AbstractTests {
         try {
             this.process(template);
             Assertions.fail("что-то не упало, а должно было");
-        } catch (Sfqt2lException ex) {
+        } catch (SqlFtlException ex) {
             Assertions.assertNotNull(ex.getCause());
             String message = ex.getCause().getMessage();
             Assertions.assertNotNull(message);

@@ -41,7 +41,7 @@ public class TypeHelper {
                     encoder.put(name, value);
                 }
             } catch (IllegalAccessException e) {
-                throw new Sfqt2lException("Unable to create map of SQL type names to int values", e);
+                throw new SqlFtlException("Unable to create map of SQL type names to int values", e);
             }
         }
     }

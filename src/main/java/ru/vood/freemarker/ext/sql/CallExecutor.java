@@ -45,7 +45,7 @@ public class CallExecutor {
             try {
                 index = Integer.parseInt(e.getKey().toString());
             } catch (NumberFormatException ex) {
-                throw new Sfqt2lException("Wrong in bind variable index: expected int, got String", ex);
+                throw new SqlFtlException("Wrong in bind variable index: expected int, got String", ex);
             }
             Object o = e.getValue();
             // JDBC can't work with java.util.Date directly
@@ -96,7 +96,7 @@ public class CallExecutor {
 
     public Map executeCall(String call, Map inBinds, Map outBinds) {
         if (call == null || "".equals(call.trim())) {
-            throw new Sfqt2lException("Unable to execute empty call");
+            throw new SqlFtlException("Unable to execute empty call");
         }
         if (inBinds == null) inBinds = Collections.emptyMap();
         if (outBinds == null) outBinds = Collections.emptyMap();

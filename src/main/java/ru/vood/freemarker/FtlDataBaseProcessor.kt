@@ -21,18 +21,18 @@ class FtlDataBaseProcessor(
     lateinit var sfqt2lProcessor: Sfqt2lProcessor
 
     fun qwe() {
-
-/* регистрация драйвера Oracle */
+        /* регистрация драйвера Oracle */
         Class.forName("oracle.jdbc.driver.OracleDriver")
         val c = DriverManager.getConnection(
                 "jdbc:oracle:thin:@prod1:1521:finprod",
                 "user", "user_passwd")
 
         val driver: Driver = OracleDriver()
-        val dataSour: DataSource = SimpleDriverDataSource(driver, url, user, password)
+        val dataSource: DataSource = SimpleDriverDataSource(driver, url, user, password)
 
-        val qwe: JdbcOperations = JdbcTemplate(dataSour)
-        sfqt2lProcessor = Sfqt2lProcessor(qwe)
+        val jdbcTemplate: JdbcOperations = JdbcTemplate(dataSource)
+        sfqt2lProcessor = Sfqt2lProcessor(jdbcTemplate)
+
     }
 
     override fun processFile(file: File, args: Array<Any?>?): String {

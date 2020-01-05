@@ -26,7 +26,7 @@ public class QueryExecutor {
 
     public FetchedResultSet executeQuery(String query, List binds) {
         if (query == null || "".equals(query.trim())) {
-            throw new Sfqt2lException("Unable to execute empty query");
+            throw new SqlFtlException("Unable to execute empty query");
         }
         return
                 connectionAdapter.getJdbcOperations().query(

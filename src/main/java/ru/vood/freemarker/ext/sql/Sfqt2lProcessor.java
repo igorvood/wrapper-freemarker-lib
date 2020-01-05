@@ -39,7 +39,7 @@ public class Sfqt2lProcessor extends Configuration {
         try {
             return super.getTemplate(templateName);
         } catch (IOException e) {
-            throw new Sfqt2lException(String.format("Unable to get template '%s'", templateName), e);
+            throw new SqlFtlException(String.format("Unable to get template '%s'", templateName), e);
         }
     }
 
@@ -51,7 +51,7 @@ public class Sfqt2lProcessor extends Configuration {
         try {
             template = new Template(templateName, templateBody, this);
         } catch (IOException e) {
-            throw new Sfqt2lException("Unable to create template from pure ftl text", e);
+            throw new SqlFtlException("Unable to create template from pure ftl text", e);
         }
         return template;
     }
@@ -68,7 +68,7 @@ public class Sfqt2lProcessor extends Configuration {
         try {
             template.process(root, dest);
         } catch (IOException | TemplateException e) {
-            throw new Sfqt2lException("ftl processing exception", e);
+            throw new SqlFtlException("ftl processing exception", e);
         }
     }
 
@@ -76,7 +76,7 @@ public class Sfqt2lProcessor extends Configuration {
         try {
             setSharedVariable(name, val);
         } catch (TemplateModelException e) {
-            throw new Sfqt2lException("Unable to register " + name + " variable", e);
+            throw new SqlFtlException("Unable to register " + name + " variable", e);
         }
     }
 
