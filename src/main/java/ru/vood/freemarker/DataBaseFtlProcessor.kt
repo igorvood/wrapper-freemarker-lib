@@ -11,7 +11,7 @@ import java.sql.Driver
 import java.sql.DriverManager
 import javax.sql.DataSource
 
-class FtlDataBaseProcessor(
+class DataBaseFtlProcessor(
         val cfg: Configuration,
         val jdbcDriver: String,
         val url: String,
