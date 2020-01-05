@@ -15,7 +15,7 @@ class TemplateProcessorStrTests extends AbstractTests {
         final String txt = "значение переменной равно ";
 
         Template template =
-                this.sfqt2lProcessor.getTemplateFromString(
+                this.sqlFtlProcessor.getTemplateFromString(
                         "тестовый шаблон",
                         "<#assign x = 777/>\n" + txt + "${x?c}"
                 );
@@ -29,7 +29,7 @@ class TemplateProcessorStrTests extends AbstractTests {
         String expectedErrorText = "ожидаемый текст";
 
         Template template =
-                this.sfqt2lProcessor.getTemplateFromString(
+                this.sqlFtlProcessor.getTemplateFromString(
                         ERROR_TEMPLATE_NAME, "<#stop '" + expectedErrorText + "'/>"
                 );
 
@@ -39,7 +39,7 @@ class TemplateProcessorStrTests extends AbstractTests {
     @Test
     void textPlainTextFtlTemplateNameFromError() {
         Template template =
-                this.sfqt2lProcessor.getTemplateFromString(
+                this.sqlFtlProcessor.getTemplateFromString(
                         ERROR_TEMPLATE_NAME, "<#assign r = default_connection().query('select ошибка')/>"
                 );
         Assertions.assertTrue(getErrorFromBuggyFtl(template).contains(ERROR_TEMPLATE_NAME));
@@ -49,7 +49,7 @@ class TemplateProcessorStrTests extends AbstractTests {
     void textPlainTextFtlTemplateNameFromStdFunction() {
         final String testTemplateName = "хороший шаблон";
         Template template =
-                this.sfqt2lProcessor.getTemplateFromString(testTemplateName, "${.current_template_name}");
+                this.sqlFtlProcessor.getTemplateFromString(testTemplateName, "${.current_template_name}");
         String res = process(template);
         Assertions.assertEquals(testTemplateName, res);
     }

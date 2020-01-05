@@ -13,12 +13,12 @@ import java.util.Map;
 public class ConnectionAdapter {
 
 
-    private final Sfqt2lProcessor config;
+    private final SqlFtlProcessor config;
     private final JdbcOperations jdbcOperations;
     private final QueryExecutor qe;
     private final CallExecutor ce;
 
-    public ConnectionAdapter(Sfqt2lProcessor config, JdbcOperations jdbcOperations) {
+    public ConnectionAdapter(SqlFtlProcessor config, JdbcOperations jdbcOperations) {
         this.config = config;
         this.jdbcOperations = jdbcOperations;
         qe = new QueryExecutor(this);
@@ -29,7 +29,7 @@ public class ConnectionAdapter {
         return jdbcOperations;
     }
 
-    Sfqt2lProcessor getConfig() {
+    SqlFtlProcessor getConfig() {
         return config;
     }
 

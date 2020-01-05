@@ -13,7 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
-import ru.vood.freemarker.ext.sql.Sfqt2lProcessor;
+import ru.vood.freemarker.ext.sql.SqlFtlProcessor;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -32,13 +32,13 @@ abstract class AbstractTests {
 
     @Autowired
     DataSource dataSource;
-    Sfqt2lProcessor sfqt2lProcessor;
+    SqlFtlProcessor sqlFtlProcessor;
     private DataSourceTransactionManager transactionManager;
 
     @BeforeAll
     private void setup() {
         JdbcTemplate template = new JdbcTemplate(dataSource);
-        this.sfqt2lProcessor = new Sfqt2lProcessor(template);
+        this.sqlFtlProcessor = new SqlFtlProcessor(template);
         this.transactionManager = new DataSourceTransactionManager(dataSource);
     }
 
@@ -58,7 +58,7 @@ abstract class AbstractTests {
         return
                 tt.execute(
                         transactionStatus -> {
-                            sfqt2lProcessor.process(template, sw, args);
+                            sqlFtlProcessor.process(template, sw, args);
                             return sw.toString();
                         }
                 );
@@ -68,7 +68,7 @@ abstract class AbstractTests {
         TransactionTemplate tt = new TransactionTemplate(transactionManager);
         tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
-        Template template = sfqt2lProcessor.getTemplate(templateName);
+        Template template = sqlFtlProcessor.getTemplate(templateName);
 
         return process(template, args);
     }

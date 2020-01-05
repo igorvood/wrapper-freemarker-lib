@@ -11,10 +11,10 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 
-public class Sfqt2lProcessor extends Configuration {
+public class SqlFtlProcessor extends Configuration {
     private final ConnectionAdapter defaultConnection;
 
-    public Sfqt2lProcessor(JdbcOperations jdbcOperations) {
+    public SqlFtlProcessor(JdbcOperations jdbcOperations) {
         super(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
         this.defaultConnection = new ConnectionAdapter(this, jdbcOperations);
         // Set default settings

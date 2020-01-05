@@ -5,7 +5,7 @@ import oracle.jdbc.driver.OracleDriver
 import org.springframework.jdbc.core.JdbcOperations
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.datasource.SimpleDriverDataSource
-import ru.vood.freemarker.ext.sql.Sfqt2lProcessor
+import ru.vood.freemarker.ext.sql.SqlFtlProcessor
 import java.io.File
 import java.sql.Driver
 import java.sql.DriverManager
@@ -18,7 +18,7 @@ class FtlDataBaseProcessor(
         private val user: String,
         private val password: String) : TemplateProcessor {
 
-    lateinit var sfqt2lProcessor: Sfqt2lProcessor
+    lateinit var sqlFtlProcessor: SqlFtlProcessor
 
     fun qwe() {
         /* регистрация драйвера Oracle */
@@ -31,7 +31,7 @@ class FtlDataBaseProcessor(
         val dataSource: DataSource = SimpleDriverDataSource(driver, url, user, password)
 
         val jdbcTemplate: JdbcOperations = JdbcTemplate(dataSource)
-        sfqt2lProcessor = Sfqt2lProcessor(jdbcTemplate)
+        sqlFtlProcessor = SqlFtlProcessor(jdbcTemplate)
 
     }
 
