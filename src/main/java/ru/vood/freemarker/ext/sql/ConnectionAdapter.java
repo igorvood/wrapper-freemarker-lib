@@ -26,7 +26,7 @@ public class ConnectionAdapter {
         ce = new CallExecutor(this);
     }
 
-    JdbcOperations getJdbcOperations() {
+    public JdbcOperations getJdbcOperations() {
         return jdbcOperations;
     }
 
