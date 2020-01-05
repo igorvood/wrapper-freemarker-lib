@@ -12,11 +12,8 @@ import java.util.*
  * This class wraps [Array] and adapts it for using in FTL both as a sequence and as a bean.
  */
 class ArrayModel(sqlArray: java.sql.Array, wrapper: BeansWrapper) : BeanModel(sqlArray, wrapper), TemplateSequenceModel {
-    private val array: Array<Any>
 
-    init {
-        array = sqlArray.array as Array<Any>
-    }
+    private val array: Array<Any> = sqlArray.array as Array<Any>
 
 
     /**

@@ -12,11 +12,7 @@ import java.util.*
  * This class wraps [Clob] and adapts it for using in FTL as a string.
  */
 class ClobModel(clob: Clob, wrapper: BeansWrapper) : BeanModel(clob, wrapper), TemplateScalarModel {
-    private var string: String
-
-    init {
-        string = clob.getSubString(1, clob.length().toInt())
-    }
+    private var string: String = clob.getSubString(1, clob.length().toInt())
 
     /**
      * Returns the string representation of this clob.
