@@ -6,9 +6,9 @@ import java.io.File
 import java.io.StringWriter
 import java.util.*
 
-class FtlProcessorImpl(val cfg: Configuration) : TemplateProcessor {
+class FtlProcessor(val cfg: Configuration) : TemplateProcessor {
 
-    constructor() : this(Configuration(Configuration.VERSION_2_3_29))
+    constructor() : this(Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS))
 
     override fun processFile(file: File, args: Array<Any?>?): String {
         if (!file.exists())
