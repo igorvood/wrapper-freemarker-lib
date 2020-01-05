@@ -11,11 +11,11 @@ class FetchedResultSetRowModel internal constructor(
         private val resultSet: FetchedResultSet,
         private val rowIndex: Int, wrapper: ObjectWrapper) : WrappingTemplateModel(wrapper), TemplateSequenceModel, TemplateHashModelEx {
 
-    override fun get(index: Int): TemplateModel {
+    override fun get(index: Int): TemplateModel? {
         return wrap(resultSet.rows[rowIndex][index])
     }
 
-    override fun get(key: String): TemplateModel {
+    override fun get(key: String): TemplateModel? {
         return wrap(resultSet.rows[rowIndex][resultSet.getColumnIndex(key)])
     }
 

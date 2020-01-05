@@ -26,11 +26,11 @@ class FetchedResultSetTransposedModel(
         private val frst: FetchedResultSetTransposed,
         wrapper: ObjectWrapper?) : WrappingTemplateModel(wrapper), TemplateSequenceModel, TemplateHashModelEx {
 
-    override fun get(columnIndex: Int): TemplateModel {
+    override fun get(columnIndex: Int): TemplateModel? {
         return wrap(frst.transposedData[columnIndex])
     }
 
-    override fun get(key: String): TemplateModel {
+    override fun get(key: String): TemplateModel? {
         return wrap(frst.transposedData[frst.resultSet.getColumnIndex(key)])
     }
 

@@ -21,7 +21,7 @@ class StructModel(sqlStruct: Struct,
      *
      * @return the item at the specified index
      */
-    override fun get(index: Int): TemplateModel {
+    override fun get(index: Int): TemplateModel? {
         return wrap(struct[index])
     }
 

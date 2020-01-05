@@ -26,11 +26,11 @@ class FetchedResultSetModel(frs: FetchedResultSet, objectWrapper: BeansWrapper) 
         private const val TRANSPOSE_METHOD_NAME = "transpose"
     }
 
-    override fun get(index: Int): TemplateModel = FetchedResultSetRowModel(frs, index, objectWrapper)
+    override fun get(index: Int): TemplateModel? = FetchedResultSetRowModel(frs, index, objectWrapper)
 
     override fun size(): Int = frs.rows.size
 
-    override fun get(key: String): TemplateModel =
+    override fun get(key: String): TemplateModel? =
             if (key == TRANSPOSE_METHOD_NAME) {
                 transpose()
             } else super.get(key)
