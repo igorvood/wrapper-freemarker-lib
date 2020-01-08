@@ -24,7 +24,6 @@ internal class DataBaseFtlProcessorTest : AbstractDataBaseFtlProcessorTests() {
     @ParameterizedTest
     @MethodSource("testData")
     fun checkFtlFileProcessResult(fileName: String) {
-        println(dataBaseFtlProcessor.nativeSqlFtlProcessor.sharedVariableNames)
         checkFtlFileProcessResult("$fileName.txt", "sfqtl/$fileName.ftl")
     }
 

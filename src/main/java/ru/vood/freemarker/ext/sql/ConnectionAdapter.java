@@ -1,6 +1,6 @@
 package ru.vood.freemarker.ext.sql;
 
-import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.JdbcTemplate;
 import ru.vood.freemarker.ext.processor.ProcessFtl;
 
 import java.util.List;
@@ -15,18 +15,18 @@ public class ConnectionAdapter {
 
 
     private final ProcessFtl config;
-    private final JdbcOperations jdbcOperations;
+    private final JdbcTemplate jdbcOperations;
     private final QueryExecutor qe;
     private final CallExecutor ce;
 
-    public ConnectionAdapter(ProcessFtl config, JdbcOperations jdbcOperations) {
+    public ConnectionAdapter(ProcessFtl config, JdbcTemplate jdbcOperations) {
         this.config = config;
         this.jdbcOperations = jdbcOperations;
         qe = new QueryExecutor(this);
         ce = new CallExecutor(this);
     }
 
-    public JdbcOperations getJdbcOperations() {
+    public JdbcTemplate getJdbcOperations() {
         return jdbcOperations;
     }
 

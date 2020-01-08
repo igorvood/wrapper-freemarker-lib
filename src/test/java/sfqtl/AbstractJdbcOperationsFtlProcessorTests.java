@@ -7,11 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.util.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 import ru.vood.freemarker.JdbcOperationsFtlProcessor;
 
 import javax.sql.DataSource;
@@ -31,13 +28,11 @@ abstract class AbstractJdbcOperationsFtlProcessorTests {
     @Autowired
     DataSource dataSource;
     JdbcOperationsFtlProcessor jdbcOperationsFtlProcessor;
-    private DataSourceTransactionManager transactionManager;
 
     @BeforeAll
     private void setup() {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         this.jdbcOperationsFtlProcessor = new JdbcOperationsFtlProcessor(jdbcTemplate);
-        this.transactionManager = new DataSourceTransactionManager(dataSource);
     }
 
     void checkFtlFileProcessResult(String expectedResultFileName, String ftlFileName, Object... args) {
@@ -48,12 +43,7 @@ abstract class AbstractJdbcOperationsFtlProcessorTests {
     }
 
     String process(String fileName, Object... args) {
-        TransactionTemplate tt = new TransactionTemplate(transactionManager);
-        tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        return
-                tt.execute(
-                        transactionStatus -> jdbcOperationsFtlProcessor.processFile(fileName, args)
-                );
+        return jdbcOperationsFtlProcessor.processFile(fileName, args);
     }
 
     private List<String> loadListOfStrings(String fileName) {

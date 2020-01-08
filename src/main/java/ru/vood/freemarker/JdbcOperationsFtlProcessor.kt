@@ -1,9 +1,9 @@
 package ru.vood.freemarker
 
-import org.springframework.jdbc.core.JdbcOperations
+import org.springframework.jdbc.core.JdbcTemplate
 import ru.vood.freemarker.ext.processor.SpringFtlProcessor
 
-class JdbcOperationsFtlProcessor(jdbcOperations: JdbcOperations) : TemplateProcessor {
+class JdbcOperationsFtlProcessor(jdbcOperations: JdbcTemplate) : TemplateProcessor {
 
     private val sqlFtlProcessor: SpringFtlProcessor = SpringFtlProcessor(jdbcOperations)
 
