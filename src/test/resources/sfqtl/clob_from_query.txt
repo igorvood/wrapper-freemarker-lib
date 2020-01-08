@@ -2,3 +2,6 @@ Fetch CLOB from query.
 Print CLOB: "loooong text
  русский текст"
 CLOB length: 27
+Print CLOB1: "loooong text1
+ русский текст1"
+CLOB length1: 29
