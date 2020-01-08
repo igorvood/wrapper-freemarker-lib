@@ -12,7 +12,7 @@ import java.sql.SQLException;
 
 @Configuration
 @PropertySource("sfqtl/db_connection.properties")
-class TestConfig {
+public class TestConfig {
 
     @Value("${db.connection.url}")
     String dbConnectionUrl;
@@ -30,6 +30,21 @@ class TestConfig {
         ds.setUser(dbConnectionUser);
         ds.setPassword(dbConnectionPassword);
         return ds;
+    }
+
+    @Bean("dbConnectionUrl")
+    public String getTestDbConnectionUrl() {
+        return dbConnectionUrl;
+    }
+
+    @Bean("dbConnectionUser")
+    public String getTestDbConnectionUser() {
+        return dbConnectionUser;
+    }
+
+    @Bean("dbConnectionPassword")
+    public String getTestDbConnectionPassword() {
+        return dbConnectionPassword;
     }
 
 }
