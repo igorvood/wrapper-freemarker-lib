@@ -6,13 +6,12 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.util.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
-import ru.vood.freemarker.JdbcOperationsFtlProcessor;
+import ru.vood.freemarker.DataBaseFtlProcessor;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -26,17 +25,30 @@ import java.util.List;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(classes = {TestConfig.class})
 @ExtendWith(SpringExtension.class)
-abstract class AbstractJdbcOperationsFtlProcessorTests {
+abstract class AbstractDataBaseFtlProcessorTests {
 
     @Autowired
     DataSource dataSource;
-    JdbcOperationsFtlProcessor jdbcOperationsFtlProcessor;
+
+    @Autowired()
+    @Qualifier("dbConnectionUrl")
+    String dbConnectionUrl;
+
+    @Autowired()
+    @Qualifier("dbConnectionUser")
+    String dbConnectionUser;
+
+    @Autowired()
+    @Qualifier("dbConnectionPassword")
+    String dbConnectionPassword;
+
+    DataBaseFtlProcessor dataBaseFtlProcessor;
     private DataSourceTransactionManager transactionManager;
 
     @BeforeAll
     private void setup() {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        this.jdbcOperationsFtlProcessor = new JdbcOperationsFtlProcessor(jdbcTemplate);
+        JdbcTemplate template = new JdbcTemplate(dataSource);
+        this.dataBaseFtlProcessor = new DataBaseFtlProcessor("oracle.jdbc.driver.OracleDriver", dbConnectionUrl, dbConnectionUser, dbConnectionPassword);
         this.transactionManager = new DataSourceTransactionManager(dataSource);
     }
 
@@ -48,12 +60,7 @@ abstract class AbstractJdbcOperationsFtlProcessorTests {
     }
 
     String process(String fileName, Object... args) {
-        TransactionTemplate tt = new TransactionTemplate(transactionManager);
-        tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        return
-                tt.execute(
-                        transactionStatus -> jdbcOperationsFtlProcessor.processFile(fileName, args)
-                );
+        return dataBaseFtlProcessor.processFile(fileName, args);
     }
 
     private List<String> loadListOfStrings(String fileName) {

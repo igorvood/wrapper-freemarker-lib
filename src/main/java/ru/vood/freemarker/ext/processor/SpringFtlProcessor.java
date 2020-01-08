@@ -14,7 +14,7 @@ public class SpringFtlProcessor extends SimpleFtlProcessor {
     public SpringFtlProcessor(JdbcOperations jdbcOperations) {
         super();
         this.defaultConnection = new ConnectionAdapter(this, jdbcOperations);
-        setSharedVariable("default_connection", getGetDefaultConnectionMethod());
+        registerSharedVar("default_connection", getGetDefaultConnectionMethod());
     }
 
     public TemplateMethodModelEx getGetDefaultConnectionMethod() {

@@ -12,10 +12,18 @@ class NativeSqlFtlProcessor(
         private val password: String) : SimpleFtlProcessor() {
 
     override fun process(template: Template, vararg args: Any?): String {
+        this.setSharedVariable("teststr", "teststr")
         val jdbcOperations = getJdbcOperations(jdbcDriver, url, username, password)
         val springFtlProcessor = SpringFtlProcessor(jdbcOperations)
+        registerSharedVar("default_connection", springFtlProcessor.getDefaultConnectionMethod)
+
+//        println(springFtlProcessor.sharedVariableNames)
+        this.sharedVariableNames.stream()
+                .map { Pair(it as String, this.getSharedVariable(it)) }
+                .forEach { springFtlProcessor.registerSharedVar(it.first, it.second) }
+//        println(springFtlProcessor.sharedVariableNames)
         val process = springFtlProcessor.process(template, *args)
-        jdbcOperations.dataSource.connection.close()
+//        jdbcOperations.dataSource.connection.close()
         return process
     }
 
