@@ -52,6 +52,16 @@ internal class FtlProcessorTest {
     }
 
     @Test
+    fun processFileByClassWithParamObject_3() {
+        val stringParam = Car("BMW", 123456789, Date(100, 3, 13))
+        ftlProcessor.registerSharedVar("carJava", stringParam)
+        val processFile = ftlProcessor.processFile(FtlProcessorTest::class.java, "FtlProcessorImplTestWithParamObject2.ftl")
+        Assertions.assertTrue(processFile.contains("model->BMW,price->123456789,date->"))
+        Assertions.assertTrue(processFile.contains(",dateTime->"))
+        Assertions.assertEquals("model->BMW,price->123456789,date->2000-04-13,dateTime->2000-04-13 00:00:00", processFile)
+    }
+
+    @Test
     fun processNotExistsFile() {
         Assertions.assertThrows(SqlFtlException::class.java)
         { ftlProcessor.processFile("qwerty.ftl") }

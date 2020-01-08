@@ -9,4 +9,9 @@ class FtlProcessor : TemplateProcessor {
         simpleFtlProcessor.registerSharedVar("args", args)
         return simpleFtlProcessor.process(simpleFtlProcessor.getTemplate(fileName), args)
     }
+
+    override fun registerSharedVar(name: String, `val`: Any) {
+        simpleFtlProcessor.setSharedVariable(name, `val`)
+    }
+
 }

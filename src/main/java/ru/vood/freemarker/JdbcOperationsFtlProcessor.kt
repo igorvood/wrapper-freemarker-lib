@@ -10,4 +10,9 @@ class JdbcOperationsFtlProcessor(jdbcOperations: JdbcTemplate) : TemplateProcess
     override fun processFile(fileName: String, vararg args: Any?): String {
         return sqlFtlProcessor.process(sqlFtlProcessor.getTemplate(fileName), args)
     }
+
+    override fun registerSharedVar(name: String, `val`: Any) {
+        sqlFtlProcessor.setSharedVariable(name, `val`)
+    }
+
 }
